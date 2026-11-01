@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Escape the Pit</title>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0807;--panel:#1b1412;--line:#4a3528;--ink:#ecdfc6;--dim:#a8977a;--blood:#c23a2b;--ember:#ff7a33;--gold:#d9b45c;--ok:#7fbf6a}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(ellipse at top,#1c1210 0%,var(--bg) 60%);color:var(--ink);font-family:'IM Fell English',Georgia,'Times New Roman',serif}
+#app{max-width:1100px;margin:0 auto;padding:10px 16px 24px}
+header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:4px 0 10px;border-bottom:1px solid var(--line)}
+h1{font-family:'IM Fell English SC',Georgia,serif;font-weight:normal;font-size:26px;margin:0;letter-spacing:1px;color:var(--gold);flex:1;min-width:200px}
+.chip{font-size:15px;padding:5px 11px;border:1px solid var(--line);border-radius:20px;background:#140e0c;color:var(--dim);white-space:nowrap}
+.chip b{color:var(--ink);font-weight:normal}
+.hbtn{font:inherit;font-size:15px;padding:5px 12px;border-radius:20px;border:1px solid var(--line);background:#24191500;color:var(--ink);cursor:pointer}
+.hbtn:hover{border-color:var(--gold);color:var(--gold)}
+#stage{position:relative;width:100%;aspect-ratio:1000/620;background:#000;border:1px solid var(--line);margin-top:10px;border-radius:6px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+canvas{width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+#narr{margin-top:10px;min-height:52px;padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:6px;font-size:18px;line-height:1.4}
+#narr b{color:var(--gold);font-weight:normal}
+#ctrl{margin-top:10px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;min-height:10px}
+.slot{width:64px;height:72px;border:1px solid var(--line);border-radius:6px;background:#140e0c;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--dim);font-size:13px}
+.slot span{font-family:'IM Fell English SC',Georgia,serif;font-size:32px;color:#3a2c24;line-height:1}
+.slot.got{border-color:var(--gold);box-shadow:0 0 14px rgba(217,180,92,.35)}
+.slot.got span{color:var(--gold)}
+.tr{font:inherit;font-size:20px;width:86px;height:70px;border-radius:8px;border:2px solid var(--line);background:#1a1210;color:var(--dim);cursor:pointer;transition:transform .08s}
+.tr.lit{color:var(--ink);border-color:#8a6a3a}
+.tr.flash{background:#e8b84f;color:#1a1210;transform:scale(1.08);box-shadow:0 0 24px #e8b84f}
+.tr:disabled{cursor:default}
+#modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.74);padding:16px;z-index:10;overflow:auto}
+#modal.show{display:flex}
+.card{background:linear-gradient(#211815,#171110);border:1px solid #6a4a34;max-width:640px;width:100%;padding:24px 26px;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.8);margin:auto}
+.card h2{font-family:'IM Fell English SC',Georgia,serif;font-weight:normal;font-size:28px;margin:4px 0 12px;color:var(--gold);line-height:1.15}
+.card h3{font-weight:normal;font-size:22px;margin:6px 0 14px;line-height:1.3}
+.card p{font-size:18px;line-height:1.5;margin:8px 0}
+.kicker{font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--blood)}
+.pre{font-style:italic;color:#d6c6a8;border-left:3px solid var(--line);padding-left:12px}
+.quote{font-style:italic;color:#e9d9b6;font-size:20px!important;border-left:3px solid var(--blood);padding-left:14px}
+button.opt{display:block;width:100%;text-align:left;font:inherit;font-size:18px;padding:11px 14px;margin:8px 0;border-radius:6px;border:1px solid var(--line);background:#120d0b;color:var(--ink);cursor:pointer}
+button.opt:hover:not(:disabled){border-color:var(--gold)}
+button.opt.right{border-color:var(--ok);background:#18240f}
+button.opt.wrong{border-color:var(--blood);background:#2a0f0c}
+.btn{font:inherit;font-size:19px;padding:10px 22px;border-radius:6px;border:1px solid var(--gold);background:#3a2814;color:var(--ink);cursor:pointer;margin-top:10px}
+.btn:hover{background:#4d3519}
+.okt{color:var(--ok)}.badt{color:#ff8a7a}
+.why{color:var(--dim)}
+input.txt{font:inherit;font-size:22px;padding:10px 12px;width:100%;border-radius:6px;border:1px solid var(--line);background:#0e0a09;color:var(--ink);letter-spacing:2px}
+.cert{text-align:center}
+.cert .big{font-family:'IM Fell English SC',Georgia,serif;font-size:42px;color:var(--gold);margin:6px 0}
+.stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+.stats div{border:1px solid var(--line);border-radius:6px;padding:8px 14px;min-width:110px}
+.stats small{display:block;color:var(--dim);font-size:13px;letter-spacing:2px;text-transform:uppercase}
+.stats b{font-weight:normal;font-size:24px}
+.code{font-family:'IM Fell English SC',Georgia,serif;font-size:28px;letter-spacing:4px;color:var(--ember);border:1px dashed var(--ember);display:inline-block;padding:6px 16px;border-radius:6px}
+.tl{list-style:none;padding:0;margin:10px 0}
+.tl li{display:flex;align-items:center;gap:8px;padding:8px 10px;margin:6px 0;border:1px solid var(--line);border-radius:6px;background:#120d0b;font-size:16px;line-height:1.3}
+.tl li.ok{border-color:var(--ok);background:#141f0e}
+.tl li .n{color:var(--gold);min-width:22px}
+.tl li .t{flex:1}
+.tl li button{font:inherit;font-size:14px;width:36px;height:32px;border-radius:5px;border:1px solid var(--line);background:#1c1411;color:var(--ink);cursor:pointer}
+.tl li button:disabled{opacity:.25;cursor:default}
+.lvls{display:flex;gap:6px;justify-content:center;margin:10px 0 4px;flex-wrap:wrap}
+.lvls span{font-size:13px;padding:3px 9px;border:1px solid var(--line);border-radius:12px;color:var(--dim)}
+.lvls span.on{border-color:var(--gold);color:var(--gold)}
+.lvls span.done{border-color:var(--ok);color:var(--ok)}
+.mini{width:100%;border-collapse:collapse;margin:8px 0;font-size:15px}.mini td{padding:4px 8px;border-bottom:1px solid var(--line);text-align:left}.mini td:last-child{text-align:right}
+@media (max-width:600px){h1{font-size:21px}#narr{font-size:16px}.card{padding:18px}.card p,button.opt{font-size:16px}.tr{width:66px;height:60px;font-size:17px}}
+@media print{header,#stage,#narr,#ctrl{display:none}#modal{position:static;background:none}.card{box-shadow:none;border:2px solid #000;background:#fff;color:#000}.card *{color:#000!important}.btn{display:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>Escape the Pit</h1>
+    <span class="chip" id="where">Toledo, Spain</span>
+    <span class="chip">Level <b id="lvl">–</b></span>
+    <span class="chip">Time <b id="clock">0:00</b></span>
+    <span class="chip">Mistakes <b id="mist">0</b></span>
+    <button class="hbtn" id="hintBtn">Hint</button>
+    <button class="hbtn" id="muteBtn">Sound: On</button>
+    <button class="hbtn" id="restartBtn">Restart</button>
+  </header>
+  <div id="stage"><canvas id="cv"></canvas></div>
+  <div id="narr">An escape room based on Edgar Allan Poe's “The Pit and the Pendulum.”</div>
+  <div id="ctrl"></div>
+</div>
+<div id="modal"></div>
+
+<script>
+/* ============ Setup ============ */
+const W=1000,H=620;
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const $=s=>document.querySelector(s);
+const M=$('#modal'),NARR=$('#narr'),CTRL=$('#ctrl');
+function resize(){const r=cv.getBoundingClientRect(),d=window.devicePixelRatio||1;cv.width=Math.round(r.width*d);cv.height=Math.round(r.height*d);ctx.setTransform(cv.width/W,0,0,cv.height/H,0,0);}
+window.addEventListener('resize',resize);resize();
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function say(t){NARR.innerHTML=t;}
+const modalOpen=()=>M.classList.contains('show');
+function showModal(html){M.innerHTML='<div class="card">'+html+'</div>';M.classList.add('show');M.scrollTop=0;}
+function hideModal(){M.classList.remove('show');}
+const G={team:'',start:0,end:0,mistakes:0,hints:0,shake:0,hintIx:{},lvl:0,lm:[0,0,0,0,0,0,0],resumed:0};
+function miss(n=1){G.mistakes+=n;G.lm[G.lvl]=(G.lm[G.lvl]||0)+n;$('#mist').textContent=G.mistakes;}
+const LV=[null,
+  {s:'ch0',name:'The Tribunal',code:''},
+  {s:'ch1',name:'Darkness & the Pit',code:'SERGE'},
+  {s:'paint',name:'The Painted Walls',code:'LOZENGE'},
+  {s:'ch2',name:'The Pendulum',code:'SCYTHE'},
+  {s:'ch3',name:'The Burning Walls',code:'SURCINGLE'},
+  {s:'testi',name:'Testimony to Lasalle',code:'TALON'}];
+function NM(){return (G.team||'Prisoner').replace(/[<>&"]/g,'');}
+function lvlDots(n){return '<div class="lvls">'+LV.slice(1).map((l,i)=>`<span class="${i+1<n?'done':i+1===n?'on':''}">${i+1}. ${l.name}</span>`).join('')+'</div>';}
+function levelCard(n,goal,cb){G.lvl=n;$('#lvl').textContent=n+' / 6';
+  showModal(`<div class="kicker">Level ${n} of 6</div><h2>${LV[n].name}</h2>${lvlDots(n)}<p>${goal}</p>${LV[n].code?`<p class="why">Resume code for this level: <b style="color:var(--ember);font-weight:normal;letter-spacing:2px">${LV[n].code}</b> — write it down in case you have to stop.</p>`:''}<button class="btn" id="lvGo">Begin Level ${n}</button>`);
+  $('#lvGo').onclick=()=>{hideModal();cb&&cb();};}
+
+/* ============ Audio (Web Audio, no files) ============ */
+/* Everything is synthesized live: a stone-dungeon reverb, a soundscape per level,
+   and effects. No audio files, so nothing can be blocked on the school network. */
+const A={c:null,muted:false,master:null,rev:null,nb:null,amb:null,ambName:'',danger:0,hb:0,drip:2,crk:0,chain:6};
+function makeIR(c,dur,decay){const len=Math.floor(c.sampleRate*dur),b=c.createBuffer(2,len,c.sampleRate);for(let ch=0;ch<2;ch++){const d=b.getChannelData(ch);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay);}return b;}
+function ac(){
+  if(!A.c){const c=new (window.AudioContext||window.webkitAudioContext)();A.c=c;
+    const comp=c.createDynamicsCompressor();comp.threshold.value=-16;comp.knee.value=12;comp.ratio.value=4;comp.connect(c.destination);
+    A.master=c.createGain();A.master.gain.value=A.muted?0:1;A.master.connect(comp);
+    A.rev=c.createConvolver();A.rev.buffer=makeIR(c,3.4,2.8);const rg=c.createGain();rg.gain.value=.55;A.rev.connect(rg).connect(A.master);
+    const len=c.sampleRate*2;A.nb=c.createBuffer(1,len,c.sampleRate);const d=A.nb.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;}
+  if(A.c.state==='suspended')A.c.resume();return A.c;}
+function out(node,wet=.4){node.connect(A.master);if(wet>0){const s=A.c.createGain();s.gain.value=wet;node.connect(s);s.connect(A.rev);}}
+function env(g,t,vol,att,dur){g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol,t+att);g.gain.exponentialRampToValueAtTime(.0001,t+Math.max(att+.01,dur));}
+function tone(f,dur,type='sine',vol=.2,when=0,att=.01,wet=.35,f2){if(A.muted||!A.c)return;const c=A.c,t=c.currentTime+when,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+dur);env(g,t,vol,att,dur);o.connect(g);out(g,wet);o.start(t);o.stop(t+dur+.05);}
+function noise(dur,vol=.2,freq=800,q=1,when=0,type='bandpass',wet=.35,f2){if(A.muted||!A.c)return;const c=A.c,t=c.currentTime+when,s=c.createBufferSource();s.buffer=A.nb;s.loop=true;const f=c.createBiquadFilter();f.type=type;f.frequency.setValueAtTime(freq,t);if(f2)f.frequency.exponentialRampToValueAtTime(f2,t+dur);f.Q.value=q;const g=c.createGain();env(g,t,vol,.005,dur);s.connect(f).connect(g);out(g,wet);s.start(t,Math.random()*1.5);s.stop(t+dur+.05);}
+function brass(f,dur,vol=.12,when=0){if(A.muted||!A.c)return;const c=A.c,t=c.currentTime+when,g=c.createGain();
+  g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol,t+.05);g.gain.setValueAtTime(vol,t+Math.max(.06,dur-.1));g.gain.exponentialRampToValueAtTime(.0001,t+dur+.12);
+  const lp=c.createBiquadFilter();lp.type='lowpass';lp.Q.value=2;lp.frequency.setValueAtTime(f*1.2,t);lp.frequency.linearRampToValueAtTime(f*7,t+.07);lp.frequency.linearRampToValueAtTime(f*3.5,t+.25);
+  const vib=c.createOscillator(),vg=c.createGain();vib.frequency.value=5.5;vg.gain.setValueAtTime(0,t);vg.gain.linearRampToValueAtTime(f*.006,t+.3);vib.connect(vg);
+  [-6,0,7].forEach(cn=>{const o=c.createOscillator();o.type='sawtooth';o.frequency.value=f;o.detune.value=cn;vg.connect(o.frequency);o.connect(lp);o.start(t);o.stop(t+dur+.25);});
+  vib.start(t);vib.stop(t+dur+.25);lp.connect(g);out(g,.5);}
+function bell(f,vol=.1,when=0){[[1,1,2.2],[2.76,.5,1.4],[5.4,.25,.8],[8.9,.12,.5]].forEach(([r,a,d])=>tone(f*r,d,'sine',vol*a,when,.002,.6));}
+const SFX={
+  good(){bell(784,.11);bell(1175,.08,.12);},
+  bad(){tone(98,.7,'sawtooth',.08,0,.01,.4);tone(104,.7,'sawtooth',.08,0,.01,.4);noise(.5,.14,220,1,0,'lowpass',.3);},
+  whoosh(v=.16){noise(.6,v*1.3,350,1.5,0,'bandpass',.3,1800);if(v>.13)tone(2300+Math.random()*300,.6,'sine',v*.12,.18,.002,.9);},
+  fall(){noise(.15,.25,1800,3,0,'bandpass',.5);for(let i=1;i<7;i++)noise(.06,.2/i,1200+Math.random()*1800,4,i*.22+Math.random()*.08,'bandpass',.6);noise(1,.25,700,.6,2.1,'lowpass',.8,200);tone(140,.4,'sine',.08,2.1,.01,.7,60);},
+  squeak(){const b=Math.random()*400;tone(2600+b,.07,'sine',.05,0,.005,.3,3400+b);tone(3000+b,.05,'sine',.04,.11,.005,.3,3700+b);},
+  chew(){for(let i=0;i<14;i++)noise(.03,.1+Math.random()*.08,2500+Math.random()*2500,3,i*.1+Math.random()*.04,'bandpass',.15);},
+  trumpet(i,dur=.5){brass([261.6,329.6,392,523.3][i],dur);},
+  fanfare(){const n=[[392,.16],[392,.16],[392,.16],[523.3,.55],[392,.22],[523.3,.9]];let w=0;n.forEach(([f,d])=>{brass(f,d,.12,w);brass(f/2,d,.06,w);w+=d+.05;});[261.6,329.6,392,523.3].forEach(f=>brass(f,1.8,.06,w));},
+  rumble(){noise(1.8,.32,90,.7,0,'lowpass',.5);tone(38,1.6,'sine',.2,0,.2,.2);},
+  thud(){tone(80,1.3,'sine',.5,0,.005,.7,32);noise(.4,.2,300,.7,0,'lowpass',.7);},
+  grate(){tone(70,1.2,'sawtooth',.07,0,.05,.5,55);noise(1.2,.16,900,6,0,'bandpass',.5,500);noise(.15,.2,2500,8,1.15,'bandpass',.7);tone(620,.9,'triangle',.05,1.15,.002,.8);},
+  snuff(){noise(.55,.09,5000,.7,0,'highpass',.3);},
+  flare(){noise(.35,.12,600,1,0,'lowpass',.4,2500);},
+  drip(){const f=1200+Math.random()*900;tone(f,.12,'sine',.06,0,.002,.9,f*.55);},
+  chain(){for(let i=0;i<4;i++)tone(900+Math.random()*1500,.25,'triangle',.022,i*.09+Math.random()*.04,.002,.95);},
+  crackle(v){noise(.02+Math.random()*.03,v,1500+Math.random()*3000,2,0,'bandpass',.2);},
+  heart(){tone(64,.18,'sine',.55,0,.005,.05,40);tone(56,.2,'sine',.4,.24,.005,.05,38);}
+};
+function stopAmb(){if(!A.amb)return;const c=A.c,a=A.amb;a.g.gain.cancelScheduledValues(c.currentTime);a.g.gain.setTargetAtTime(0,c.currentTime,.5);setTimeout(()=>a.nodes.forEach(n=>{try{n.stop()}catch(e){}}),2500);A.amb=null;}
+function setAmb(name){
+  if(name===A.ambName&&A.amb)return;A.ambName=name;A.danger=0;if(!A.c)return;stopAmb();if(A.muted||!name)return;
+  const c=A.c,t=c.currentTime,g=c.createGain(),nodes=[];g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(1,t+3);out(g,.5);
+  const osc=(f,type,vol,dest,det=0)=>{const o=c.createOscillator();o.type=type;o.frequency.value=f;o.detune.value=det;const og=c.createGain();og.gain.value=vol;o.connect(og).connect(dest||g);o.start();nodes.push(o);return o;};
+  const lfo=(rate,depth,param)=>{const o=c.createOscillator(),lg=c.createGain();o.frequency.value=rate;lg.gain.value=depth;o.connect(lg).connect(param);o.start();nodes.push(o);};
+  const wind=(freq,vol,q=.8)=>{const s=c.createBufferSource();s.buffer=A.nb;s.loop=true;const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=freq;f.Q.value=q;const wg=c.createGain();wg.gain.value=vol;s.connect(f).connect(wg).connect(g);s.start();nodes.push(s);lfo(.07+Math.random()*.05,freq*.4,f.frequency);lfo(.11,vol*.6,wg.gain);};
+  const drone=(vol,cut=220)=>{const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=cut;lp.Q.value=3;lp.connect(g);lfo(.05,cut*.5,lp.frequency);[55,55.4,82.4].forEach(f=>osc(f,'sawtooth',vol,lp));};
+  if(name==='tribunal'){drone(.03,180);
+    const ci=c.createGain(),f1=c.createBiquadFilter(),f2=c.createBiquadFilter(),cg=c.createGain();
+    f1.type=f2.type='bandpass';f1.frequency.value=700;f1.Q.value=5;f2.frequency.value=1150;f2.Q.value=6;ci.connect(f1);ci.connect(f2);f1.connect(cg);f2.connect(cg);cg.connect(g);
+    cg.gain.setValueAtTime(0,t);cg.gain.linearRampToValueAtTime(.9,t+6);lfo(.08,.3,cg.gain);
+    [110,130.8,164.8,220].forEach(f=>[-9,9].forEach(d=>{const o=osc(f,'sawtooth',.05,ci,d);lfo(4.2+Math.random(),7,o.detune);}));}
+  else if(name==='dungeon'){drone(.05);wind(420,.05);}
+  else if(name==='sulphur'){drone(.04,160);wind(650,.03);osc(1318.5,'sine',.012);osc(1322,'sine',.012);const o=osc(987.8,'sine',.008);lfo(.3,12,o.detune);}
+  else if(name==='pendulum'){drone(.045,200);wind(300,.03);}
+  else if(name==='fire'){drone(.05,140);wind(240,.1,.5);wind(1300,.03);}
+  else if(name==='camp'){const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=900;lp.connect(g);lfo(.1,300,lp.frequency);[130.8,196,261.6,329.6].forEach(f=>[-5,5].forEach(d=>osc(f,'triangle',.035,lp,d)));}
+  A.amb={g,nodes};
+}
+function audioTick(dt){if(!A.c||A.muted)return;const n=A.ambName;
+  if(n==='dungeon'||n==='sulphur'||n==='pendulum'){A.drip-=dt;if(A.drip<=0){A.drip=1.5+Math.random()*4;SFX.drip();}}
+  if(n==='dungeon'||n==='tribunal'){A.chain-=dt;if(A.chain<=0){A.chain=9+Math.random()*10;SFX.chain();}}
+  if(n==='fire'){A.crk-=dt;if(A.crk<=0){A.crk=.03+Math.random()*(.25-.18*A.danger);SFX.crackle(.04+.12*A.danger*Math.random());}}
+  if((n==='pendulum'||n==='fire')&&A.danger>.15){A.hb-=dt;if(A.hb<=0){A.hb=1.15-.65*A.danger;SFX.heart();}}
+}
+
+/* ============ Shared art ============ */
+let seed=42;const rnd=()=>{seed=(seed*16807)%2147483647;return (seed-1)/2147483646;};
+const stones=[];for(let r=0,y=0;y<H+46;y+=46,r++)for(let x=-(r%2)*31-10;x<W+20;x+=62)stones.push({x,y,c:16+rnd()*12,h:20+rnd()*15});
+function drawFloor(sat=12){stones.forEach(s=>{ctx.fillStyle=`hsl(${s.h},${sat}%,${s.c}%)`;ctx.fillRect(s.x+2,s.y+2,58,42);});}
+function drawPit(x,y,r){const g=ctx.createRadialGradient(x,y,r*.2,x,y,r);g.addColorStop(0,'#000');g.addColorStop(.85,'#050303');g.addColorStop(1,'#1d1512');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#3d302a';ctx.lineWidth=9;ctx.setLineDash([16,6]);ctx.stroke();ctx.setLineDash([]);}
+function vignette(a=.8){const g=ctx.createRadialGradient(W/2,H/2,H*.3,W/2,H/2,W*.65);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,`rgba(0,0,0,${a})`);ctx.fillStyle=g;ctx.fillRect(-20,-20,W+40,H+40);}
+function star(x,y,r,a){ctx.save();ctx.globalAlpha=a;ctx.fillStyle='#e9c66a';ctx.beginPath();for(let i=0;i<8;i++){const rr=i%2?r*.35:r,an=i*Math.PI/4;ctx.lineTo(x+Math.cos(an)*rr,y+Math.sin(an)*rr);}ctx.fill();ctx.restore();}
+
+/* ============ Questions ============ */
+function ask(q,cb){
+  const opts=shuffle(q.o.map((t,i)=>({t,ok:i===0})));
+  showModal(`<div class="kicker">${q.k||''}</div>${q.pre?`<p class="pre">${q.pre}</p>`:''}<h3>${q.q}</h3><div id="opts"></div><div id="fb"></div>`);
+  const box=M.querySelector('#opts');
+  opts.forEach(op=>{const b=document.createElement('button');b.className='opt';b.textContent=op.t;b.onclick=()=>{
+    box.querySelectorAll('button').forEach(x=>x.disabled=true);b.classList.add(op.ok?'right':'wrong');
+    if(op.ok)SFX.good();else{SFX.bad();miss();}
+    const fb=M.querySelector('#fb');
+    fb.innerHTML=`<p class="${op.ok?'okt':'badt'}">${op.ok?(q.yes||'Correct.'):(q.no||'Not quite. Think back to the story.')}</p>${op.ok&&q.why?`<p class="why">${q.why}</p>`:''}<button class="btn">Continue</button>`;
+    fb.querySelector('button').onclick=()=>{hideModal();cb(op.ok);};
+  };box.appendChild(b);});
+}
+
+/* ============ Scenes ============ */
+const SC={};let cur='title';
+let fade={a:1,dir:-1,cb:null};
+function go(name){fade.dir=1;fade.cb=()=>{cur=name;CTRL.innerHTML='';SC[name].enter&&SC[name].enter();fade.dir=-1;};}
+
+/* ---- Candles (title & sentencing) ---- */
+function drawCandles(t,judges,lit,flare){
+  ctx.fillStyle='#070505';ctx.fillRect(-20,-20,W+40,H+40);
+  if(judges){for(let i=0;i<5;i++){const x=260+i*120,y=300;ctx.fillStyle='#120c0a';ctx.beginPath();ctx.moveTo(x-55,430);ctx.quadraticCurveTo(x-50,y-10,x,y-70);ctx.quadraticCurveTo(x+50,y-10,x+55,430);ctx.fill();ctx.fillStyle='#d8cfc0';ctx.globalAlpha=.25+.1*Math.sin(t*2+i);ctx.fillRect(x-9,y-22,18,2);ctx.globalAlpha=1;}}
+  for(let i=0;i<7;i++){const x=200+i*100,y=400,f=Math.sin(t*9+i*2)*2+Math.sin(t*23+i)*1.2,on=!lit||lit[i],fl=flare?flare[i]:0;
+    if(on){const R=110*(1+fl*.8),g=ctx.createRadialGradient(x,y-150,2,x,y-150,R);g.addColorStop(0,`rgba(255,${200-80*fl},120,${.32+.3*fl})`);g.addColorStop(1,'rgba(255,200,120,0)');ctx.fillStyle=g;ctx.fillRect(x-R,y-150-R,R*2,R*2);}
+    ctx.fillStyle='#e8e2d4';ctx.fillRect(x-9,y-130,18,150);
+    if(on){const k=1+fl*1.6;ctx.fillStyle='#ffcf6b';ctx.beginPath();ctx.ellipse(x+f*.5,y-130-13*k,5*k,(13+f)*k,0,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#fff6d0';ctx.beginPath();ctx.ellipse(x+f*.5,y-133-6*k,2.2*k,6*k,0,0,Math.PI*2);ctx.fill();
+      if(lit){ctx.fillStyle=`rgba(217,180,92,${.35+.25*Math.sin(t*3+i)})`;ctx.font='15px Georgia';ctx.textAlign='center';ctx.fillText('?',x,y+50);}}
+    else{ctx.strokeStyle='rgba(190,180,170,.28)';ctx.lineWidth=2;ctx.beginPath();for(let k=0;k<30;k++)ctx.lineTo(x+Math.sin(t*2+k*.3+i)*k*.4,y-132-k*4);ctx.stroke();}}
+  ctx.fillStyle='#1b1210';ctx.fillRect(110,420,780,30);ctx.fillStyle='#0f0a08';ctx.fillRect(130,450,740,200);
+  vignette(.9);
+}
+SC.title={
+  enter(){
+    say('An escape room based on Edgar Allan Poe’s “The Pit and the Pendulum.” Turn your sound on.');
+    showModal(`<div class="kicker">An Escape Room · After Edgar Allan Poe</div><h2>Escape the Pit</h2>
+      <p>Toledo, Spain. Poe never gave his narrator a name — so tonight, <b>the prisoner is you</b>. Everything that happened to him is about to happen to you. You must survive <b>six levels</b> — the tribunal, the darkness and the pit, the painted walls, the pendulum, the burning walls, and your testimony — and the only way out is to <b>answer the questions</b>.</p>
+      ${lvlDots(0)}
+      <p class="why">Wrong answers cost you: candles flare, the blade drops faster, and the walls close sooner. Every mistake is counted.</p>
+      <p><input class="txt" id="team" maxlength="40" placeholder="Your name — you are the prisoner"></p>
+      <p><input class="txt" id="rcode" maxlength="12" placeholder="Resume code (optional)" style="font-size:17px"></p>
+      <button class="btn" id="begin">Enter the Inquisition</button>`);
+    const b=$('#begin'),inp=$('#team');inp.focus();
+    const startIt=()=>{
+      const c=($('#rcode').value||'').trim().toUpperCase();let target='ch0';
+      if(c){const i=LV.findIndex(l=>l&&l.code&&l.code===c);if(i<0){$('#rcode').value='';$('#rcode').placeholder='Code not recognized — check it or leave blank';return;}target=LV[i].s;G.resumed=i;}
+      G.team=inp.value.trim()||'The Prisoner';ac();hideModal();G.start=Date.now();go(target);};
+    b.onclick=startIt;inp.onkeydown=e=>{if(e.key==='Enter')startIt();};
+  },
+  draw(t){drawCandles(t,false);}
+};
+/* ---- Level 1: The Tribunal ---- */
+const Q0=[
+  {q:'Who wrote “The Pit and the Pendulum”?',o:['Edgar Allan Poe','Mark Twain','Arthur Miller','F. Scott Fitzgerald'],why:'Poe, the master of American Gothic horror, published it in 1842.'},
+  {q:'Where and when is the story set?',o:['Toledo, Spain, during the Spanish Inquisition','London during the Great Fire','Salem, Massachusetts, in 1692','Paris during the French Revolution'],why:'The narrator is a prisoner of the Inquisition in Toledo.'},
+  {q:'What is the narrator’s name?',o:['We never learn it','Montresor','Roderick Usher','General Lasalle'],why:'Poe keeps him nameless — he could be anyone, even the reader.'},
+  {q:'From what point of view is the story told?',o:['First person — the narrator tells his own story','Third person — an outside narrator tells it','Second person — it is told to “you”','It is told through letters'],why:'Because we are inside his head, we feel every moment of his terror.'},
+  {q:'What was the Spanish Inquisition?',o:['A powerful court that imprisoned and punished people accused of heresy','A Spanish army that invaded France','A medieval hospital','A band of pirates'],why:'It held secret trials and used torture to force confessions.'},
+  {q:'What does the narrator do right after hearing his death sentence?',o:['He faints','He attacks the judges','He escapes through a window','He begs for mercy and is released'],why:'He sinks into unconsciousness and wakes in total darkness.'},
+  {q:'The word “anticipation” means…',o:['Waiting for and expecting something to happen','Forgetting something that already happened','Escaping from danger','Being rescued at the last moment'],why:'Remember this word — it is the key to the whole story.'}
+];
+const C0={lit:[1,1,1,1,1,1,1],flare:[0,0,0,0,0,0,0],pool:[]};
+SC.ch0={
+  hints:['Click a candle to answer the question hidden in its flame.','Each correct answer snuffs out a candle. Put out all seven.','A wrong answer makes the candle flare — just click it again for a new question.'],
+  enter(){
+    $('#where').textContent='The Tribunal';setAmb('tribunal');
+    C0.lit=[1,1,1,1,1,1,1];C0.flare=[0,0,0,0,0,0,0];C0.pool=shuffle(Q0);
+    say('<b>The Tribunal.</b> Click a candle to answer its question.');
+    levelCard(1,`<span class="quote" style="display:block;margin-bottom:10px">“I was sick — sick unto death with that long agony.”</span>“<b>${NM()}.</b>” A judge reads your name aloud. You stand before the black-robed judges of the Inquisition, your wrists raw from the ropes. Seven tall white candles burn on their table. <b>Answer the question hidden in each flame to snuff out all seven</b> — only then will the darkness take you.`);
+  },
+  update(dt){for(let i=0;i<7;i++)C0.flare[i]=Math.max(0,C0.flare[i]-dt*1.2);},
+  draw(t){drawCandles(t,true,C0.lit,C0.flare);},
+  down(p){
+    for(let i=0;i<7;i++){const x=200+i*100;if(C0.lit[i]&&Math.abs(p.x-x)<42&&p.y>200&&p.y<460){
+      const q=Object.assign({k:'Level 1 · Candle '+(i+1)+' of 7'},C0.pool.shift());
+      ask(q,ok=>{if(ok){C0.lit[i]=0;SFX.snuff();const n=C0.lit.filter(x=>!x).length;
+          if(n<7)say(`The flame dies with a hiss. (${n} of 7 candles out)`);
+          else{say('The last candle dies…');setTimeout(()=>{showModal(`<div class="kicker">Level 1 · Complete</div><h2>Death</h2><p>The judges’ lips move as they read your sentence, ${NM()}. You cannot make out the words — until one lands like a hammer: <b>death</b>.</p><p class="why">The candles that seemed like angels become meaningless ghosts. The room spins…</p><button class="btn" id="faint">Faint</button>`);$('#faint').onclick=()=>{SFX.thud();hideModal();G.shake=.5;go('ch1');};},700);}}
+        else{C0.pool.push(q);C0.flare[i]=1;SFX.flare();G.shake=.25;say('The candle <b>flares</b> brighter! Click it again for a new question.');}});
+      return;}}
+  }
+};
+
+/* ---- Chamber I: Darkness & the Pit ---- */
+const PIT1={x:500,y:320,r:92};
+const C1={L:{x:120,y:110},objs:[]};
+function c1Objects(){return [
+  {id:'bread',x:850,y:505,r:34,letter:'R',num:'I',
+    q:{k:'Level 2 · The Bread',pre:'Your fingers close on a loaf of bread and a pitcher of water.',q:'The narrator finds food and water left for him. What does this suggest?',o:['His captors want to keep him alive for now — the torture isn’t over','A friend is secretly helping him','He is about to be released','The guards forgot about him'],why:'The Inquisition isn’t finished with him. Every “mercy” in this story sets up the next horror.'},
+    draw(){ctx.fillStyle='#6b4a2a';ctx.beginPath();ctx.ellipse(this.x-12,this.y+6,24,13,-.2,0,Math.PI*2);ctx.fill();ctx.fillStyle='#8a6a48';ctx.beginPath();ctx.ellipse(this.x-14,this.y+2,16,7,-.2,0,Math.PI*2);ctx.fill();ctx.fillStyle='#5a5148';ctx.beginPath();ctx.moveTo(this.x+14,this.y+22);ctx.lineTo(this.x+38,this.y+22);ctx.lineTo(this.x+34,this.y-14);ctx.lineTo(this.x+18,this.y-14);ctx.closePath();ctx.fill();ctx.strokeStyle='#5a5148';ctx.lineWidth=4;ctx.beginPath();ctx.arc(this.x+40,this.y+2,9,-1.4,1.4);ctx.stroke();}},
+  {id:'carving',x:300,y:72,r:34,letter:'A',num:'II',
+    q:{k:'Chamber I · The Dungeon',pre:'Scratched into the wall: hideous, skeletal figures. Beneath them, a single carved letter.',q:'When the narrator wakes, what is his situation?',o:['He is in a completely dark dungeon with no idea where he is','He is in a bright cell with a barred window','He is chained in the courtroom','He is locked aboard a prison ship'],why:'He explores by touch, trying to understand a room he cannot see.'},
+    draw(){ctx.strokeStyle='#8a7d70';ctx.lineWidth=2;for(let k=-1;k<=1;k++){const x=this.x+k*28;ctx.beginPath();ctx.arc(x,this.y-6,7,0,Math.PI*2);ctx.moveTo(x,this.y+1);ctx.lineTo(x,this.y+14);ctx.moveTo(x-8,this.y+6);ctx.lineTo(x+8,this.y+6);ctx.moveTo(x,this.y+14);ctx.lineTo(x-6,this.y+22);ctx.moveTo(x,this.y+14);ctx.lineTo(x+6,this.y+22);ctx.stroke();}}},
+  {id:'stone',x:592,y:402,r:26,letter:'T',num:'III',
+    q:{k:'Chamber I · The Pit',pre:'A loose chunk of masonry at the edge of… something. You let it drop. It clatters against the sides for a long, long time — then a faint splash.',q:'What does the narrator realize about the pit?',o:['It is very deep and was designed to kill prisoners who fall in','It is a well for drinking water','It is a secret tunnel to freedom','It is shallow and harmless'],why:'The pit was a trap meant to look like an accident — death by the unknown.'},
+    draw(){ctx.fillStyle='#6d6660';ctx.beginPath();ctx.moveTo(this.x-14,this.y+8);ctx.lineTo(this.x-6,this.y-12);ctx.lineTo(this.x+13,this.y-8);ctx.lineTo(this.x+16,this.y+10);ctx.closePath();ctx.fill();ctx.fillStyle='#8c847c';ctx.fillRect(this.x-4,this.y-8,8,4);}},
+  {id:'hem',x:165,y:500,r:32,letter:'S',num:'IV',
+    q:{k:'Chamber I · Theme',pre:'A strip torn from the hem of your own robe. You used it to mark where you started tracing the wall — but the walls seem to go on forever in the dark.',q:'Which theme does the dark, unknown dungeon most clearly introduce?',o:['Fear of the unknown','Wealth leads to happiness','Friendship conquers all','Pride comes before a fall'],why:'The narrator is more terrified of what he cannot see than of what he knows.'},
+    draw(){ctx.strokeStyle='#9a8a74';ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(this.x-26,this.y);ctx.bezierCurveTo(this.x-10,this.y-16,this.x+6,this.y+16,this.x+26,this.y-2);ctx.stroke();ctx.lineCap='butt';}}
+];}
+const GRATE={x:962,y:110,w:36,h:74};
+function c1Ctrl(){CTRL.innerHTML=['I','II','III','IV'].map(n=>{const o=C1.objs.find(o=>o.num===n);return `<div class="slot ${o.done?'got':''}"><span>${o.done?o.letter:'?'}</span>${n}</div>`;}).join('');}
+SC.ch1={
+  hints:["Move your pointer (or tap) slowly around the room. You can only sense what is right next to you.","There are four things to find: bread in the bottom-right corner, a torn strip of robe in the bottom-left, skeleton carvings near the top wall, and a loose stone just below-right of the pit.","Stay away from the center of the room!","Put the four letters in order I–II–III–IV, then try the iron grate on the right-hand wall."],
+  enter(){
+    if(!G.start)G.start=Date.now();
+    $('#where').textContent='Darkness & the Pit';setAmb('dungeon');
+    C1.objs=c1Objects();C1.L={x:120,y:110};P.x=120;P.y=110;
+    say('<b>Darkness.</b> Move your pointer to feel your way along the floor and walls. Find four carved letters — and do not wander into the center.');
+    c1Ctrl();
+    levelCard(2,'You wake on cold, wet stone in total darkness. Are you buried alive? You force yourself to breathe. Move your pointer to feel your way across the floor and walls. <b>Find four objects, answer their questions, and collect four carved letters</b> to unlock the way out. <i>Watch for faint glints in the darkness</i> — something is hidden in each corner of the cell. Whatever you do — stay away from the center of the room.');
+  },
+  update(dt){C1.L.x+=(P.x-C1.L.x)*Math.min(1,dt*9);C1.L.y+=(P.y-C1.L.y)*Math.min(1,dt*9);},
+  draw(t){
+    ctx.fillStyle='#0c0807';ctx.fillRect(-20,-20,W+40,H+40);drawFloor(12);
+    ctx.fillStyle='#241a16';ctx.fillRect(-20,-20,W+40,56);ctx.fillRect(-20,H-36,W+40,60);ctx.fillRect(-20,-20,56,H+40);ctx.fillRect(W-36,-20,60,H+40);
+    ctx.strokeStyle='#120c0a';ctx.lineWidth=2;for(let x=0;x<W;x+=48){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,36);ctx.moveTo(x+24,H-36);ctx.lineTo(x+24,H);ctx.stroke();}
+    drawPit(PIT1.x,PIT1.y,PIT1.r);
+    C1.objs.forEach(o=>o.draw());
+    ctx.fillStyle='#3b3029';ctx.fillRect(GRATE.x-GRATE.w/2,GRATE.y-GRATE.h/2,GRATE.w,GRATE.h);ctx.strokeStyle='#6f645b';ctx.lineWidth=4;for(let i=-1;i<=1;i++){ctx.beginPath();ctx.moveTo(GRATE.x+i*10,GRATE.y-GRATE.h/2+4);ctx.lineTo(GRATE.x+i*10,GRATE.y+GRATE.h/2-4);ctx.stroke();}ctx.fillStyle='#8a6a3a';ctx.fillRect(GRATE.x-8,GRATE.y-6,16,14);
+    const L=C1.L,rad=150+Math.sin(t*3)*5;
+    const g=ctx.createRadialGradient(L.x,L.y,8,L.x,L.y,rad);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(.5,'rgba(0,0,0,.35)');g.addColorStop(1,'rgba(0,0,0,.985)');ctx.fillStyle=g;ctx.fillRect(-20,-20,W+40,H+40);
+    C1.objs.forEach((o,k)=>{
+      if(o.done){star(o.x,o.y,9,.55+.25*Math.sin(t*3));return;}
+      const tw=Math.max(0,Math.sin(t*1.6+k*1.7));star(o.x+10,o.y-12,7+6*tw,.3+.6*tw*tw);
+      const d=Math.hypot(L.x-o.x,L.y-o.y);
+      if(d<140){const a=1-d/140;ctx.strokeStyle=`rgba(233,198,106,${.35+.5*a})`;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(o.x,o.y,o.r+6+3*Math.sin(t*5),0,Math.PI*2);ctx.stroke();
+        ctx.fillStyle=`rgba(233,198,106,${a})`;ctx.font='16px Georgia';ctx.textAlign='center';ctx.fillText('click to search',o.x,o.y+o.r+24);}
+    });
+    if(C1.objs.every(o=>o.done)){const a=.5+.4*Math.sin(t*4);ctx.strokeStyle=`rgba(255,160,80,${a})`;ctx.lineWidth=3;ctx.strokeRect(GRATE.x-GRATE.w/2-6,GRATE.y-GRATE.h/2-6,GRATE.w+12,GRATE.h+12);star(GRATE.x-30,GRATE.y-46,10,a);}
+  },
+  down(p){
+    if(Math.hypot(p.x-PIT1.x,p.y-PIT1.y)<PIT1.r){miss();G.shake=.5;SFX.fall();say('<b>You stumble at the edge of the pit!</b> A loosened stone tumbles down… and down… before a distant splash. That was nearly you. <i>(Mistake +1)</i>');return;}
+    for(const o of C1.objs){if(Math.hypot(p.x-o.x,p.y-o.y)<o.r){
+      if(o.done){say(`You already found this. It bears the letter <b>${o.letter}</b>, marked <b>${o.num}</b>.`);return;}
+      ask(o.q,ok=>{if(ok){o.done=true;c1Ctrl();const n=C1.objs.filter(x=>x.done).length;say(n<4?`Carved beneath it: the letter <b>${o.letter}</b>, marked with the numeral <b>${o.num}</b>. (${n} of 4 found)`:'All four letters found. Somewhere on the walls there must be a way out of this cell…');}else say('Your mind clouds with fear. Feel for it again and think back to the story.');});
+      return;}}
+    if(Math.abs(p.x-GRATE.x)<34&&Math.abs(p.y-GRATE.y)<50){openGrate();return;}
+  }
+};
+function openGrate(){
+  showModal(`<div class="kicker">Chamber I · The Iron Grate</div><p class="pre">Your hands find an iron grate in the wall. Its lock has four letter-shaped holes carved into it.</p><h3>Enter the four-letter word:</h3><p><input class="txt" id="word" maxlength="8" autocomplete="off"></p><div id="fb"></div><button class="btn" id="tryW">Turn the lock</button> <button class="btn" id="cancelW" style="border-color:#4a3528;background:none">Step back</button>`);
+  const inp=$('#word');inp.focus();
+  const tryIt=()=>{if(inp.value.trim().toUpperCase()==='RATS'){SFX.grate();showModal(`<div class="kicker">Level 2 · Complete</div><h2>RATS</h2><p>The grate grinds open — onto nothing but another stone wall. A cruel trick… or a warning? Something small and warm scurries across your feet in the dark. You shudder.</p><p class="why">Remember this word. In Poe’s story, help comes from the last place anyone would expect.</p><p>Exhausted, you drink from the pitcher, but the water was <b>drugged</b>.</p><p>When you wake, a strange, sulphurous glow is seeping from the walls…</p><button class="btn" id="next">Open your eyes</button>`);$('#next').onclick=()=>{hideModal();go('paint');};}
+    else{SFX.bad();miss();$('#fb').innerHTML='<p class="badt">The lock will not turn. (Mistake +1)</p>';inp.select();}};
+  $('#tryW').onclick=tryIt;inp.onkeydown=e=>{if(e.key==='Enter')tryIt();};$('#cancelW').onclick=hideModal;
+}
+
+/* ---- Level 3: The Painted Walls ---- */
+const PAINT=[
+  {k:'pit',label:'The Pit',m:'The unknown, death, and fear of what cannot be seen'},
+  {k:'pend',label:'The Pendulum',m:'The passage of time and the inevitability of death'},
+  {k:'walls',label:'The Closing Walls',m:'Being trapped, helplessness, and having no escape'},
+  {k:'rats',label:'The Rats',m:'Unexpected hope and survival'},
+  {k:'dark',label:'Darkness',m:'Fear, uncertainty, and psychological suffering'}];
+const PX=[120,310,500,690,880],PY=165;
+const CP={paint:[],tiles:[]};
+function drawRat(x,y,dir,s=1){ctx.save();ctx.translate(x,y);ctx.scale(dir*s,s);ctx.strokeStyle='#8a6f6a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-16,0);ctx.quadraticCurveTo(-34,-10,-40,4);ctx.stroke();ctx.fillStyle='#4b3f39';ctx.beginPath();ctx.ellipse(0,0,18,9,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(16,-2,9,6,.2,0,Math.PI*2);ctx.fill();ctx.fillStyle='#7a5f5a';ctx.beginPath();ctx.arc(12,-8,4,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ff4a3a';ctx.fillRect(18,-5,2.5,2.5);ctx.restore();}
+function wrapText(s,x,y,maxW,lh){const words=s.split(' ');let line='';const lines=[];words.forEach(w=>{const tt=line?line+' '+w:w;if(ctx.measureText(tt).width>maxW&&line){lines.push(line);line=w;}else line=tt;});lines.push(line);const y0=y-(lines.length-1)*lh/2;lines.forEach((l,i)=>ctx.fillText(l,x,y0+i*lh));}
+function drawIcon(k,x,y,t){
+  ctx.save();ctx.beginPath();ctx.rect(x-74,y-109,148,218);ctx.clip();
+  ctx.fillStyle='#0e0b08';ctx.fillRect(x-74,y-109,148,218);
+  if(k==='pit'){drawPit(x,y+10,52);}
+  else if(k==='pend'){const a=.55*Math.sin(t*2.2),ex=x+Math.sin(a)*120,ey=y-100+Math.cos(a)*120;ctx.strokeStyle='#6b645b';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,y-100);ctx.lineTo(ex,ey);ctx.stroke();ctx.save();ctx.translate(ex,ey);ctx.rotate(-a);ctx.fillStyle='#cfccc6';ctx.beginPath();ctx.moveTo(-36,-3);ctx.quadraticCurveTo(0,30,36,-3);ctx.quadraticCurveTo(0,12,-36,-3);ctx.fill();ctx.restore();}
+  else if(k==='walls'){const s=10*Math.sin(t*1.5);ctx.fillStyle='#b8401c';ctx.fillRect(x-74,y-109,30+s,218);ctx.fillRect(x+44-s,y-109,30+s,218);ctx.fillStyle='#ff9a4a';ctx.fillRect(x-46+s,y-109,3,218);ctx.fillRect(x+43-s,y-109,3,218);ctx.fillStyle='#c9ab90';ctx.beginPath();ctx.arc(x,y-8,7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#8a8076';ctx.fillRect(x-7,y,14,24);}
+  else if(k==='rats'){drawRat(x+6,y+40,1,1.1);drawRat(x-10,y-20,-1,.9);drawRat(x+20,y-70,1,.7);}
+  else{ctx.fillStyle='#000';ctx.fillRect(x-74,y-109,148,218);const a=.35+.3*Math.sin(t*1.7);ctx.fillStyle=`rgba(255,220,120,${a})`;ctx.beginPath();ctx.ellipse(x-14,y,7,3,0,0,Math.PI*2);ctx.ellipse(x+14,y,7,3,0,0,Math.PI*2);ctx.fill();}
+  ctx.restore();
+}
+function drawTile(tl,lift){
+  if(lift){ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(tl.x-85,tl.y-36,178,84);}
+  ctx.fillStyle=tl.placed?'#18240f':'#2a1f17';ctx.fillRect(tl.x-89,tl.y-42,178,84);
+  ctx.strokeStyle=tl.placed?'#7fbf6a':(lift?'#e9c66a':'#8a6a3a');ctx.lineWidth=2;ctx.strokeRect(tl.x-89,tl.y-42,178,84);
+  ctx.fillStyle='#ecdfc6';ctx.font='15px Georgia';ctx.textAlign='center';wrapText(tl.m,tl.x,tl.y+5,160,18);
+}
+SC.paint={
+  hints:['Each painting is a symbol from the story. Drag a meaning card from the bottom onto the painting it matches.','The pendulum is about time. The rats are about hope.','A wrong match bounces back and counts as a mistake.'],
+  enter(){
+    $('#where').textContent='The Painted Walls';setAmb('sulphur');
+    CP.paint=shuffle(PAINT).map((p,i)=>Object.assign({},p,{x:PX[i],done:false}));
+    CP.tiles=shuffle(PAINT).map((p,i)=>{const hx=108+i*196;return {k:p.k,m:p.m,hx,hy:520,x:hx,y:520,placed:false};});
+    CP.drag=null;CP.over=null;CP.finished=false;
+    say('<b>The Painted Walls.</b> Drag each meaning onto the painting it matches.');
+    levelCard(3,'A faint, sulphurous light reveals walls covered in hideous paintings — the horrors the Inquisition has in store for you. <b>Drag each meaning card onto the painting it symbolizes.</b> Match all five to break fear’s hold on your mind.');
+  },
+  draw(t){
+    const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#24220f');g.addColorStop(1,'#0d0b06');ctx.fillStyle=g;ctx.fillRect(-20,-20,W+40,H+40);
+    ctx.globalAlpha=.4;drawFloor(20);ctx.globalAlpha=1;ctx.fillStyle=`rgba(190,180,60,${.07+.03*Math.sin(t*2)})`;ctx.fillRect(-20,-20,W+40,H+40);
+    CP.paint.forEach(p=>{ctx.fillStyle=p.done?'#7fbf6a':(CP.over===p?'#e9c66a':'#6a4a2a');ctx.fillRect(p.x-82,PY-117,164,234);drawIcon(p.k,p.x,PY,t);
+      ctx.fillStyle=p.done?'#a8e08f':'#d9b45c';ctx.font='20px "IM Fell English SC", Georgia, serif';ctx.textAlign='center';ctx.fillText(p.label,p.x,PY+140);});
+    CP.tiles.forEach(tl=>{if(tl!==CP.drag)drawTile(tl);});
+    if(CP.drag)drawTile(CP.drag,true);
+    vignette(.55);
+  },
+  down(p){if(CP.finished)return;for(let i=CP.tiles.length-1;i>=0;i--){const tl=CP.tiles[i];if(!tl.placed&&Math.abs(p.x-tl.x)<89&&Math.abs(p.y-tl.y)<42){CP.drag=tl;CP.ox=p.x-tl.x;CP.oy=p.y-tl.y;return;}}},
+  move(p){if(!CP.drag)return;CP.drag.x=p.x-CP.ox;CP.drag.y=p.y-CP.oy;CP.over=CP.paint.find(pp=>!pp.done&&Math.abs(CP.drag.x-pp.x)<92&&CP.drag.y<330)||null;},
+  up(){
+    const tl=CP.drag;if(!tl)return;CP.drag=null;const pp=CP.over;CP.over=null;
+    if(!pp){tl.x=tl.hx;tl.y=tl.hy;return;}
+    if(pp.k===tl.k){pp.done=true;tl.placed=true;tl.x=pp.x;tl.y=PY+195;SFX.good();
+      const n=CP.paint.filter(x=>x.done).length;say(`<b>${pp.label}</b> — ${tl.m.toLowerCase()}. The painting’s eyes go dim. (${n} of 5)`);
+      if(n===5){CP.finished=true;setTimeout(()=>{showModal(`<div class="kicker">Level 3 · Complete</div><h2>The Spell Is Broken</h2><p>In the light you see the truth: the cell is far smaller than it seemed in the dark. Fear had made it feel endless.</p><p class="why">Poe’s symbols turn the narrator’s fears into things he can see.</p><p>But the drug still clouds your mind. You sink into sleep once more — and wake unable to move…</p><button class="btn" id="next">Wake up</button>`);$('#next').onclick=()=>{hideModal();go('ch2');};},800);}}
+    else{SFX.bad();miss();G.shake=.3;tl.x=tl.hx;tl.y=tl.hy;say(`The painted fiends sneer. That meaning doesn’t fit <b>${pp.label}</b>. <i>(Mistake +1)</i>`);}
+  }
+};
+
+/* ---- Chamber II: The Pendulum ---- */
+const Q2=[
+  {k:'Chamber II · Symbol',q:'The pendulum swings closer with every pass. What does it most likely symbolize?',o:['The passage of time and the inevitability of death','The narrator’s hope for rescue','The power of the French army','The narrator’s hunger'],why:'Like a clock, the pendulum counts down the narrator’s remaining time.'},
+  {k:'Chamber II · Symbol',q:'The rats swarm the narrator but end up setting him free. What do they symbolize?',o:['Unexpected hope and survival','Disease and decay','The judges of the Inquisition','The narrator’s guilt'],why:'Hope comes from the last place he expected it.'},
+  {k:'Chamber II · Symbol',q:'What does the pit in the center of the dungeon represent?',o:['The unknown, death, and fear of what cannot be seen','Treasure hidden by the Inquisition','A secret way out of the prison','The narrator’s childhood home'],why:'The pit is death hidden in darkness.'},
+  {k:'Chamber II · Plot',q:'Why does the narrator rub the greasy food on his straps?',o:['To attract the rats so they will chew through the straps','To make the straps slippery so he can wriggle out','To feed the rats so they leave him alone','To signal the guards'],why:'It is a clever plan: turn the rats into his rescuers.'},
+  {k:'Chamber II · Symbol',q:'The darkness of the dungeon mostly creates…',o:['Fear, uncertainty, and psychological suffering','A peaceful place to rest','A hiding place from the guards','Confusion about what year it is'],why:'Poe uses darkness to build terror inside the narrator’s mind.'},
+  {k:'Chamber II · Plot',q:'How does the pendulum move?',o:['It swings back and forth while slowly lowering toward him','It drops straight down all at once','It spins in circles above the pit','It is pushed by the guards'],why:'The slow descent is what makes it so terrifying — he can see death coming.'},
+  {k:'Chamber II · Theme',q:'The narrator is strapped down with a blade descending, yet he still comes up with a plan. Which theme does this show?',o:['Survival and determination','Revenge','Greed','Young love'],why:'Even when death seems certain, he keeps looking for a way to survive.'}
+];
+const DISH={x:120,y:560};
+const PIV={x:500,y:58};
+const C2={};
+function c2Ctrl(){CTRL.innerHTML=C2.straps.map((s,i)=>`<div class="slot ${s.cut?'got':''}"><span>${s.cut?'✂':(s.greased?'•':'—')}</span>Strap ${i+1}</div>`).join('');}
+SC.ch2={
+  hints:["You are looking up from the frame. Drag a piece of greasy meat from the dish (bottom left) onto one of the four leather straps.","When a rat climbs up onto a greased strap, click the rat.","Answer correctly and the rat chews through the strap. A wrong answer scares it off — and the blade drops lower!"],
+  enter(){
+    $('#where').textContent='The Pendulum';setAmb('pendulum');
+    Object.assign(C2,{L:120,t:0,prevA:0,ang:0,straps:[360,450,540,630].map(x=>({x,greased:false,cut:false,rat:null})),rats:[],drag:null,pool:shuffle(Q2),qi:0,done:false,shown:false});
+    say('<b>The Pendulum.</b> Drag the greasy meat onto the straps, then click the rats that come.');
+    c2Ctrl();
+    levelCard(4,'You wake flat on your back, strapped to a wooden frame. You can only look <i>up</i> — and far above you, a razor-sharp crescent swings across your body… sinking lower with every pass. <b>Smear greasy meat on the straps to lure the rats, then answer each rat’s question</b> so it chews through. Free all four straps before the blade reaches you.');
+  },
+  update(dt){
+    C2.t+=dt;C2.ang=.8*Math.sin(C2.t*Math.PI*2/2.4);
+    if(C2.prevA*C2.ang<0&&!C2.done)SFX.whoosh(.06+.14*(C2.L/360));C2.prevA=C2.ang;
+    A.danger=C2.done?0:Math.max(0,Math.min(1,(C2.L-120)/236));
+    if(!C2.done){C2.L+=dt*3.6;if(C2.L>=356){C2.L=356;c2Fail();}}
+    else{C2.L=Math.max(0,C2.L-dt*160);if(C2.L<=0&&!C2.shown){C2.shown=true;c2Win();}}
+    C2.rats.forEach(r=>{
+      if(r.state==='run'){if(Math.abs(r.x-r.tx)>3){r.dir=Math.sign(r.tx-r.x);r.x+=r.dir*210*dt;}else if(r.y>470){r.y-=140*dt;}else{r.state='wait';SFX.squeak();say('A rat has climbed onto the greasy strap, sniffing. <b>Click the rat.</b>');}}
+      else if(r.state==='chew'){r.timer-=dt;if(r.timer<=0){r.strap.cut=true;r.strap.rat=null;r.state='flee';c2Ctrl();if(C2.straps.every(s=>s.cut)){C2.done=true;say('<b>The last strap snaps!</b> You slide off the frame just as the blade sweeps past…');}else say('Snap! The strap gives way. Keep going.');}}
+      else if(r.state==='flee'){if(r.y<575)r.y+=170*dt;else{r.dir=Math.sign(r.home-r.x);r.x+=r.dir*280*dt;if(Math.abs(r.x-r.home)<8)r.gone=true;}}
+      r.wob=(r.wob||0)+dt;
+    });
+    C2.rats=C2.rats.filter(r=>!r.gone);
+  },
+  draw(t){
+    // First-person view: you lie on your back looking up the walls to a far ceiling.
+    const k=Math.max(0,Math.min(1,(C2.L-120)/236)),cx=500,cy=165,CW=170,CH=100;
+    ctx.fillStyle='#120d0a';ctx.fillRect(-20,-20,W+40,H+40);
+    const C=[[cx-CW,cy-CH],[cx+CW,cy-CH],[cx+CW,cy+CH],[cx-CW,cy+CH]],S=[[-20,-20],[W+20,-20],[W+20,H+20],[-20,H+20]],wc=['#2a1f17','#241b14','#1b140f','#271d15'];
+    for(let i=0;i<4;i++){const j=(i+1)%4;ctx.fillStyle=wc[i];ctx.beginPath();ctx.moveTo(C[i][0],C[i][1]);ctx.lineTo(C[j][0],C[j][1]);ctx.lineTo(S[j][0],S[j][1]);ctx.lineTo(S[i][0],S[i][1]);ctx.closePath();ctx.fill();
+      ctx.strokeStyle='rgba(0,0,0,.4)';ctx.lineWidth=1.5;for(let q=1;q<7;q++){const f=(q/7)**2;ctx.beginPath();ctx.moveTo(C[i][0]+(S[i][0]-C[i][0])*f,C[i][1]+(S[i][1]-C[i][1])*f);ctx.lineTo(C[j][0]+(S[j][0]-C[j][0])*f,C[j][1]+(S[j][1]-C[j][1])*f);ctx.stroke();}
+      ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(C[i][0],C[i][1]);ctx.lineTo(S[i][0],S[i][1]);ctx.stroke();}
+    [[150,110],[850,110],[110,330],[890,330],[300,30],[700,30]].forEach(([x,y],q)=>{const a=.2+.15*Math.sin(t*2+q)+.4*k;ctx.fillStyle=`rgba(255,${190-90*k},70,${a})`;ctx.beginPath();ctx.ellipse(x-8,y,5,3,0,0,Math.PI*2);ctx.ellipse(x+8,y,5,3,0,0,Math.PI*2);ctx.fill();});
+    ctx.fillStyle='#17110d';ctx.fillRect(cx-CW,cy-CH,CW*2,CH*2);ctx.strokeStyle='#3a2c22';ctx.lineWidth=2;ctx.strokeRect(cx-CW,cy-CH,CW*2,CH*2);
+    ctx.fillStyle='#3c2f25';ctx.beginPath();ctx.arc(cx-34,cy-58,11,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.moveTo(cx-60,cy+40);ctx.lineTo(cx-8,cy+40);ctx.lineTo(cx-20,cy-44);ctx.lineTo(cx-48,cy-44);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#3c2f25';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(cx-24,cy-30);ctx.lineTo(cx,cy-18);ctx.stroke();
+    ctx.fillStyle='rgba(217,180,92,.35)';ctx.font='13px Georgia';ctx.textAlign='center';ctx.fillText('TIME',cx-34,cy+60);
+    ctx.fillStyle='#4a3020';ctx.fillRect(-20,575,170,70);ctx.fillRect(850,575,190,70);
+    const rb=ctx.createRadialGradient(500,640,40,500,660,380);rb.addColorStop(0,'#7c7166');rb.addColorStop(1,'#463e37');
+    ctx.fillStyle=rb;ctx.beginPath();ctx.ellipse(500,650,330,200,0,Math.PI,0);ctx.fill();
+    ctx.fillStyle='#5a5047';ctx.beginPath();ctx.ellipse(205,600,40,70,-.25,0,Math.PI*2);ctx.ellipse(795,600,40,70,.25,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#b89c84';ctx.beginPath();ctx.ellipse(196,548,20,14,-.4,0,Math.PI*2);ctx.ellipse(804,548,20,14,.4,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#5b5048';ctx.beginPath();ctx.ellipse(DISH.x,DISH.y,52,16,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#7a6a5c';ctx.beginPath();ctx.ellipse(DISH.x,DISH.y-3,44,11,0,0,Math.PI*2);ctx.fill();
+    for(let i=0;i<4;i++){ctx.fillStyle='#9a4a32';ctx.beginPath();ctx.ellipse(DISH.x-22+i*15,DISH.y-6,8,5,i,0,Math.PI*2);ctx.fill();}
+    if(!C2.done&&!C2.drag){ctx.fillStyle=`rgba(217,180,92,${.5+.3*Math.sin(t*4)})`;ctx.font='16px Georgia';ctx.textAlign='center';ctx.fillText('drag the meat',DISH.x,DISH.y+36);}
+    C2.straps.forEach(st=>{const top=650-200*Math.sqrt(Math.max(0,1-((st.x-500)/330)**2));
+      if(st.cut){ctx.fillStyle='#5a3a22';ctx.fillRect(st.x-9,top,18,14);ctx.fillRect(st.x-9,610,18,30);return;}
+      ctx.fillStyle='#5a3a22';ctx.fillRect(st.x-9,top,18,650-top);ctx.fillStyle='#3a2414';ctx.fillRect(st.x-9,top+40,18,4);
+      if(st.greased){ctx.fillStyle='rgba(220,170,90,.55)';ctx.fillRect(st.x-9,top,18,650-top);ctx.fillStyle='#9a4a32';ctx.fillRect(st.x-5,top+14,7,6);ctx.fillRect(st.x-1,top+40,7,6);}
+      if(C2.drag&&Math.abs(C2.drag.x-st.x)<28&&!st.greased){ctx.strokeStyle='#d9b45c';ctx.lineWidth=2;ctx.strokeRect(st.x-12,top-3,24,650-top);}});
+    C2.rats.forEach(r=>{drawRat(r.x,r.y+(r.state==='chew'?Math.sin(r.wob*40)*1.5:0),r.dir||1);
+      if(r.state==='wait'){ctx.strokeStyle=`rgba(217,180,92,${.5+.4*Math.sin(t*6)})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(r.x,r.y,28,0,Math.PI*2);ctx.stroke();}});
+    const px=cx,py=cy-18,amp=90+430*k,bx=px+Math.sin(C2.ang)*amp,by=py+40+255*k*k,s=.35+1.45*k;
+    ctx.strokeStyle='#6b645b';ctx.lineWidth=2+5*k;ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(bx,by);ctx.stroke();
+    ctx.save();ctx.translate(bx,by);ctx.rotate(-C2.ang*.35);ctx.scale(s,s);
+    if(k>.25){ctx.globalAlpha=.18;ctx.fillStyle='#e8e4dc';const dir=Math.sign(Math.cos(C2.t*Math.PI*2/2.4))||1;for(let g=1;g<4;g++){ctx.beginPath();ctx.moveTo(-64-g*12*dir,-6);ctx.quadraticCurveTo(-g*12*dir,52,64-g*12*dir,-6);ctx.quadraticCurveTo(-g*12*dir,22,-64-g*12*dir,-6);ctx.fill();}ctx.globalAlpha=1;}
+    const bl=ctx.createLinearGradient(0,-6,0,24);bl.addColorStop(0,'#5d5a57');bl.addColorStop(.6,'#c9c6c0');bl.addColorStop(1,'#ffffff');
+    ctx.fillStyle=bl;ctx.beginPath();ctx.moveTo(-64,-6);ctx.quadraticCurveTo(0,52,64,-6);ctx.quadraticCurveTo(0,22,-64,-6);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.75)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-60,-3);ctx.quadraticCurveTo(0,52,60,-3);ctx.stroke();ctx.restore();
+    ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(930,80,24,300);ctx.fillStyle=`hsl(${40-40*k},90%,50%)`;ctx.fillRect(930,80+300*(1-k),24,300*k);
+    ctx.fillStyle='#d9c9a8';ctx.font='15px Georgia';ctx.textAlign='center';ctx.fillText('BLADE',942,72);
+    if(C2.drag){ctx.fillStyle='#9a4a32';ctx.beginPath();ctx.ellipse(C2.drag.x,C2.drag.y,10,7,.4,0,Math.PI*2);ctx.fill();}
+    vignette(.7);
+    if(k>.35&&!C2.done){const g=ctx.createRadialGradient(W/2,H/2,H*.25,W/2,H/2,W*.62);g.addColorStop(0,'rgba(140,10,0,0)');g.addColorStop(1,`rgba(140,10,0,${(k-.35)*.9*(.75+.25*Math.sin(t*(4+6*k)))})`);ctx.fillStyle=g;ctx.fillRect(-20,-20,W+40,H+40);}
+  },
+  down(p){
+    if(C2.done)return;
+    if(Math.hypot(p.x-DISH.x,p.y-DISH.y)<60){C2.drag={x:p.x,y:p.y};return;}
+    for(const r of C2.rats){if(r.state==='wait'&&Math.hypot(p.x-r.x,p.y-r.y)<34){
+      const q=C2.pool[C2.qi++%C2.pool.length];r.state='asking';
+      ask(q,ok=>{if(ok){r.state='chew';r.timer=1.6;SFX.chew();say('The rat gnaws hungrily at the greasy leather…');}
+        else{C2.L+=40;r.state='flee';r.strap.greased=false;r.strap.rat=null;G.shake=.35;c2Ctrl();say('The rat startles and scurries off, licking the strap clean. <b>The blade drops lower!</b> Re-grease the strap and try again.');}});
+      return;}}
+  },
+  move(p){if(C2.drag){C2.drag.x=p.x;C2.drag.y=p.y;}},
+  up(p){
+    if(!C2.drag)return;const d=C2.drag;C2.drag=null;
+    const s=C2.straps.find(s=>Math.abs(d.x-s.x)<28&&d.y>410&&d.y<530);
+    if(!s){return;}
+    if(s.cut||s.greased){say('That strap is already taken care of. Try another.');return;}
+    s.greased=true;const home=s.x<500?-40:W+40;
+    const r={x:home,y:575,tx:s.x,home,state:'run',strap:s,dir:Math.sign(s.x-home)};s.rat=r;C2.rats.push(r);
+    c2Ctrl();say('You smear the greasy meat across the strap. Something stirs in the shadows…');setTimeout(SFX.squeak,400);
+  }
+};
+function c2Fail(){
+  miss(2);G.shake=.6;SFX.bad();
+  showModal(`<div class="kicker">Chamber II</div><h2>The Blade Is Upon You</h2><p>The crescent’s edge slices through your robe. Keep your head, ${NM()}. Poe’s narrator found a way out — and so can you.</p><p class="why">The blade has been raised a little. Your progress on the straps is saved. (Mistakes +2)</p><button class="btn" id="again">Try again</button>`);
+  $('#again').onclick=()=>{C2.L=180;hideModal();};
+}
+function c2Win(){
+  SFX.good();
+  showModal(`<div class="kicker">Chamber II · Escaped</div><h2>Free — For Now</h2><p>You roll off the frame. Instantly, the pendulum stops and is drawn up through the ceiling.</p><p class="why">That means one terrible thing: <b>your captors are watching you.</b></p><p>Then you smell hot iron. The walls of your cell have begun to glow…</p><button class="btn" id="next">Face the walls</button>`);
+  $('#next').onclick=()=>{hideModal();go('ch3');};
+}
+
+/* ---- Chamber III: The Closing Walls ---- */
+const THEMES=['Fear of the Unknown','Survival and Determination','Psychological Terror','Time and Death','Hope in Desperate Situations'];
+const SCEN=[
+  {t:0,s:'Before he sees any danger at all, the narrator is terrified simply because he cannot see the room or know its shape.'},
+  {t:1,s:'Strapped down with a blade swinging lower, the narrator still works out a plan using food and rats.'},
+  {t:2,s:'Poe spends much of the story inside the narrator’s racing thoughts and panic rather than describing violence.'},
+  {t:3,s:'With every swing, the blade comes a little closer — like a clock counting down his last minutes.'},
+  {t:4,s:'Again and again, just when everything seems hopeless, the narrator finds one small chance to survive.'}
+];
+const C3={};
+function plaquePos(i,hw,hh){const cx=500,cy=310;return [[cx-hw*.5,cy-hh+14],[cx+hw*.5,cy-hh+14],[cx-hw+14,cy+hh*.25],[cx+hw-14,cy+hh*.25]][i];}
+function c3Ctrl(){
+  if(C3.phase==='themes'){CTRL.innerHTML=[0,1,2,3].map(i=>`<button class="tr ${i<C3.lit?'lit':''}" disabled>🎺<br><small>${['I','II','III','IV'][i]}</small></button>`).join('');return;}
+  CTRL.innerHTML=`<button class="btn" id="listen" style="margin:0">Listen to the call</button>`+[0,1,2,3].map(i=>`<button class="tr lit" data-i="${i}">🎺<br><small>${['I','II','III','IV'][i]}</small></button>`).join('');
+  $('#listen').onclick=playSeq;
+  CTRL.querySelectorAll('.tr').forEach(b=>b.onclick=()=>pressTr(+b.dataset.i,b));
+}
+function flashTr(i){const b=CTRL.querySelector(`.tr[data-i="${i}"]`);if(!b)return;b.classList.add('flash');setTimeout(()=>b.classList.remove('flash'),330);}
+function playSeq(){if(C3.playing||C3.rescue)return;C3.playing=true;C3.input=[];
+  C3.seq.forEach((n,k)=>setTimeout(()=>{SFX.trumpet(n,.45);flashTr(n);},k*620));
+  setTimeout(()=>{C3.playing=false;say('Now answer the call — press the trumpets in the <b>same order</b>.');},C3.seq.length*620);}
+function pressTr(i){if(C3.playing||C3.rescue||C3.phase!=='simon')return;SFX.trumpet(i,.35);flashTr(i);
+  C3.input.push(i);const k=C3.input.length-1;
+  if(C3.input[k]!==C3.seq[k]){miss();C3.p+=.07;G.shake=.4;setTimeout(SFX.bad,250);C3.input=[];say('Wrong note! The walls lurch closer. <b>Listen again…</b>');setTimeout(playSeq,1200);return;}
+  if(C3.input.length===C3.seq.length)c3Rescue();}
+SC.ch3={
+  hints:["Click the scorched plaques on the glowing walls. Each one describes part of the story.","Each correct theme lights a trumpet below the room. Light all four.","When the trumpets sound, press “Listen to the call,” then press the trumpets in the same order."],
+  enter(){
+    $('#where').textContent='The Burning Walls';setAmb('fire');
+    Object.assign(C3,{p:0,lit:0,phase:'themes',seq:[],input:[],pool:shuffle(SCEN),qi:0,embers:[],rt:4,rescue:false,rp:0,playing:false,plaques:[0,1,2,3].map(i=>({i,done:false})),ended:false});
+    say('<b>The Burning Walls.</b> Click the scorched plaques on the walls.');
+    c3Ctrl();
+    levelCard(5,'The iron walls glow red-hot and grind inward, pushing you toward the pit. <b>Click the scorched plaques and name the theme each one shows</b> to light four trumpets. Then answer the trumpets’ call so the approaching army can find you.',()=>SFX.rumble());
+  },
+  update(dt){
+    if(C3.rescue){C3.p=Math.max(0,C3.p-dt*.7);C3.rp=Math.min(1,C3.rp+dt*.5);}
+    A.danger=C3.rescue?0:C3.p;
+    if(!C3.rescue){C3.p+=dt/(C3.phase==='simon'?60:80);if(C3.p>=1){C3.p=1;c3Fail();}
+      C3.rt-=dt;if(C3.rt<=0){C3.rt=5+Math.random()*3;SFX.rumble();G.shake=.25;}}
+    if(Math.random()<.5)C3.embers.push({x:Math.random()*W,y:H+5,v:40+Math.random()*60,l:3});
+    C3.embers.forEach(e=>{e.y-=e.v*dt;e.x+=Math.sin(e.y/30)*.5;e.l-=dt;});C3.embers=C3.embers.filter(e=>e.l>0);
+  },
+  draw(t){
+    const p=C3.p,e=p*p*(3-2*p)*.25+p*.75,cx=500,cy=310,hw=462-(462-112)*e,hh=274-(274-112)*e;
+    const heat=Math.min(1,.2+p*1.1)*(C3.rescue?1-C3.rp:1);
+    ctx.fillStyle=`hsl(${10+6*Math.sin(t*3)},${45+45*heat}%,${8+34*heat}%)`;ctx.fillRect(-20,-20,W+40,H+40);
+    ctx.save();ctx.beginPath();ctx.rect(cx-hw,cy-hh,hw*2,hh*2);ctx.clip();drawFloor(18);ctx.fillStyle=`rgba(255,60,20,${.12+.25*heat})`;ctx.fillRect(0,0,W,H);drawPit(cx,cy,100);ctx.restore();
+    ctx.strokeStyle=`rgba(255,${150+80*heat},80,${.5+.4*heat})`;ctx.lineWidth=5;ctx.strokeRect(cx-hw,cy-hh,hw*2,hh*2);
+    // glaring fiend eyes on the walls
+    const eyes=[[cx-hw*.75,cy-hh-24],[cx,cy-hh-24],[cx+hw*.75,cy-hh-24],[cx-hw*.6,cy+hh+24],[cx+hw*.6,cy+hh+24],[cx-hw-26,cy-hh*.5],[cx+hw+26,cy-hh*.5]];
+    eyes.forEach(([x,y],k)=>{const a=.4+.5*heat+.1*Math.sin(t*5+k);ctx.fillStyle=`rgba(255,${200-60*heat},60,${a})`;ctx.beginPath();ctx.ellipse(x-9,y,6,3.5,0,0,Math.PI*2);ctx.ellipse(x+9,y,6,3.5,0,0,Math.PI*2);ctx.fill();});
+    // plaques
+    if(C3.phase==='themes')C3.plaques.forEach(pl=>{if(pl.done)return;const [x,y]=plaquePos(pl.i,hw,hh);ctx.fillStyle='#2a1610';ctx.fillRect(x-24,y-14,48,28);ctx.strokeStyle=`rgba(255,210,120,${.5+.4*Math.sin(t*5+pl.i)})`;ctx.lineWidth=2;ctx.strokeRect(x-24,y-14,48,28);ctx.fillStyle='#e9c66a';ctx.font='16px Georgia';ctx.textAlign='center';ctx.fillText('✦',x,y+6);});
+    // narrator
+    const ny=Math.max(cy+hh-30,cy+86),nx=cx;
+    ctx.fillStyle='rgba(0,0,0,.4)';ctx.beginPath();ctx.ellipse(nx,ny+12,14,5,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#8a8076';ctx.beginPath();ctx.moveTo(nx-12,ny+12);ctx.lineTo(nx+12,ny+12);ctx.lineTo(nx+6,ny-8);ctx.lineTo(nx-6,ny-8);ctx.closePath();ctx.fill();ctx.fillStyle='#c9ab90';ctx.beginPath();ctx.arc(nx,ny-14,7,0,Math.PI*2);ctx.fill();
+    C3.embers.forEach(m=>{ctx.fillStyle=`rgba(255,${120+Math.random()*80},40,${Math.min(1,m.l)})`;ctx.fillRect(m.x,m.y,2.5,2.5);});
+    if(C3.rescue){const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,`rgba(255,240,200,${.75*C3.rp})`);g.addColorStop(1,'rgba(255,240,200,0)');ctx.fillStyle=g;ctx.fillRect(-20,-20,W+40,H+40);
+      ctx.fillStyle=`rgba(230,200,170,${C3.rp})`;ctx.beginPath();ctx.ellipse(nx+40,ny-40,16,10,-.6,0,Math.PI*2);ctx.fill();ctx.fillRect(nx+48,ny-90,14,50);}
+    vignette(.6);
+  },
+  down(p){
+    if(C3.phase!=='themes'||C3.rescue)return;
+    const pp=C3.p,e=pp*pp*(3-2*pp)*.25+pp*.75,hw=462-(462-112)*e,hh=274-(274-112)*e;
+    for(const pl of C3.plaques){if(pl.done)continue;const [x,y]=plaquePos(pl.i,hw,hh);if(Math.abs(p.x-x)<32&&Math.abs(p.y-y)<24){
+      const sc=C3.pool[C3.qi++%C3.pool.length];
+      const opts=[THEMES[sc.t],...shuffle(THEMES.filter((_,i)=>i!==sc.t)).slice(0,3)];
+      ask({k:'Chamber III · Theme',pre:sc.s,q:'Which major theme does this show?',o:opts,why:'The plaque crumbles to ash and a trumpet sounds faintly in the distance.'},ok=>{
+        if(ok){pl.done=true;C3.lit++;SFX.trumpet(C3.lit-1);c3Ctrl();
+          if(C3.lit>=4){C3.phase='simon';C3.seq=Array.from({length:5},()=>Math.floor(Math.random()*4));c3Ctrl();say('<b>Trumpets!</b> Far above, an army is entering Toledo. Answer their call so they find you!');setTimeout(playSeq,900);}
+          else say(`A trumpet answers from far away. (${C3.lit} of 4)`);}
+        else{C3.p+=.08;G.shake=.4;SFX.rumble();say('The walls grind forward! <b>Try another plaque.</b>');}
+      });return;}}
+  }
+};
+function c3Fail(){
+  if(C3.ended)return;C3.ended=true;miss(2);SFX.bad();
+  showModal(`<div class="kicker">Chamber III</div><h2>At the Edge</h2><p>The burning walls force you to the very lip of the pit. Your heel slips over nothing…</p><p class="why">But the story isn’t over. The walls pull back a little. Your progress is saved. (Mistakes +2)</p><button class="btn" id="again">Hold on</button>`);
+  $('#again').onclick=()=>{C3.p=.4;C3.ended=false;hideModal();};
+}
+function c3Rescue(){
+  C3.rescue=true;CTRL.innerHTML='';say('<b>Voices! Trumpets! A grating sound of a thousand thunders!</b> The fiery walls rush back…');
+  SFX.rumble();SFX.fanfare();
+  setTimeout(()=>{ask({k:'Chamber III · The Ending',pre:'As you fall fainting into the pit, an outstretched arm catches your own.',q:'Who rescues the narrator at the very last moment?',o:['General Lasalle, whose French army has captured Toledo','The judges, who suddenly change their minds','A fellow prisoner hiding in the dungeon','The rats, who pull him away from the edge'],why:'The French army has taken Toledo. The Inquisition is in the hands of its enemies.'},()=>{go('testi');});},3600);
+}
+
+/* ---- Level 6: Testimony to Lasalle ---- */
+const EVENTS=['The judges of the Inquisition sentence the narrator to death.','He faints and wakes in a completely dark dungeon.','He tears a strip from his robe to measure the walls of his cell.','He trips and discovers a deep pit in the center of the floor.','He drinks drugged water and falls into a deep sleep.','He wakes strapped to a frame beneath a slowly descending pendulum.','He smears food on the straps, and the rats chew him free.','The red-hot walls close in, forcing him toward the pit.','General Lasalle catches his arm and rescues him.'];
+const FINALQ={k:'Level 6 · The Final Question',pre:'Lasalle nods slowly. “One last question, and you are free.”',q:'What is Poe’s biggest point in “The Pit and the Pendulum”?',o:['The anticipation of death can be just as terrifying as death itself','Crime never pays','Animals are smarter than people','Prisons should be more comfortable'],why:'Most of the horror came from what the narrator knew was coming — but not when.'};
+const CT={order:[],marks:null};
+function showTesti(msg){
+  const sc=M.scrollTop;
+  const lis=CT.order.map((e,pos)=>`<li class="${CT.marks&&CT.marks[pos]?'ok':''}"><span class="n">${pos+1}.</span><span class="t">${EVENTS[e]}</span><button data-u="${pos}" ${pos===0?'disabled':''} aria-label="Move up">▲</button><button data-d="${pos}" ${pos===CT.order.length-1?'disabled':''} aria-label="Move down">▼</button></li>`).join('');
+  showModal(`<div class="kicker">Level 6 · Your Testimony</div><h3>“${NM()}, tell me everything, from the beginning,” says General Lasalle.</h3><p class="why">Use ▲ and ▼ to put the events in the order they happened.</p><ol class="tl">${lis}</ol><div id="fb">${msg||''}</div><button class="btn" id="sub">Give testimony</button>`);
+  M.scrollTop=sc;
+  const swap=(i,j)=>{[CT.order[i],CT.order[j]]=[CT.order[j],CT.order[i]];CT.marks=null;SFX.crackle(.08);showTesti();};
+  M.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>{const i=+b.dataset.u;swap(i,i-1);});
+  M.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const i=+b.dataset.d;swap(i,i+1);});
+  $('#sub').onclick=()=>{const marks=CT.order.map((e,i)=>e===i),n=marks.filter(Boolean).length;
+    if(n===EVENTS.length){SFX.good();finalQ();}
+    else{SFX.bad();miss();CT.marks=marks;showTesti(`<p class="badt">${n} of ${EVENTS.length} events are in the right place (shown in green). Lasalle frowns: “That is not how it happened.” <i>(Mistake +1)</i></p>`);}};
+}
+function finalQ(){ask(FINALQ,ok=>{if(ok)go('end');else finalQ();});}
+SC.testi={
+  hints:['Use the ▲ and ▼ buttons to move each event up or down.','Start with the sentence and end with the rescue. The pit is discovered before the pendulum.','After you submit, events in the right spot turn green — leave those alone.'],
+  enter(){
+    $('#where').textContent='Lasalle’s Camp';setAmb('camp');
+    do{CT.order=shuffle(EVENTS.map((_,i)=>i));}while(CT.order.every((e,i)=>e===i));CT.marks=null;
+    say('<b>Level 6.</b> Put the events of your imprisonment in order.');
+    levelCard(6,'You are free — but General Lasalle must hear exactly what the Inquisition did to you. <b>Put the events of your imprisonment in the correct order</b>, then answer one final question to earn your freedom.',()=>showTesti());
+  },
+  draw(t){SC.end.draw(t);ctx.fillStyle='rgba(0,0,0,.4)';ctx.fillRect(-20,-20,W+40,H+40);}
+};
+
+/* ---- Ending ---- */
+SC.end={
+  enter(){
+    G.end=Date.now();setAmb('camp');$('#where').textContent='Rescued';setTimeout(()=>{bell(523.3,.1);bell(659.3,.08,.2);bell(784,.08,.4);bell(1046.5,.07,.6);},400);
+    const s=Math.round((G.end-G.start)/1000),tm=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+    say('<b>You escaped.</b>');
+    showModal(`<div class="cert"><div class="kicker">Certificate of Escape</div><div class="big">${G.team.replace(/</g,'&lt;')}</div><p>survived all six levels of the Inquisition’s dungeon in Toledo.</p>
+      <div class="stats"><div><small>Time</small><b>${tm}</b></div><div><small>Mistakes</small><b>${G.mistakes}</b></div><div><small>Hints</small><b>${G.hints}</b></div></div>
+      <table class="mini">${LV.slice(1).map((l,i)=>`<tr><td>Level ${i+1} · ${l.name}</td><td>${i+1<(G.resumed||1)?'skipped':(G.lm[i+1]||0)+' mistake'+((G.lm[i+1]||0)===1?'':'s')}</td></tr>`).join('')}</table>
+      ${G.resumed?`<p class="why">Resumed at Level ${G.resumed} with a code — time shown is for this session only.</p>`:''}
+      <p>Show your teacher this code:</p><div class="code">TOLEDO-1808</div></div>
+      <p style="margin-top:18px"><b style="color:var(--gold);font-weight:normal">The Big Takeaway.</b> Poe shows that the <i>anticipation</i> of death can be as terrifying as death itself. Most of the horror came from what you knew was coming — but not when.</p>
+      <p class="why"><b>Think about it:</b> Which chamber felt most stressful to you — the darkness, the blade, or the walls? Which theme of the story does that connect to, and why?</p>
+      <button class="btn" onclick="window.print()">Print certificate</button> <button class="btn" onclick="location.reload()" style="border-color:#4a3528;background:none">Play again</button>`);
+  },
+  draw(t){const g=ctx.createRadialGradient(W/2,H*.3,20,W/2,H/2,W*.7);g.addColorStop(0,'#f3e2b8');g.addColorStop(.5,'#8a5a2a');g.addColorStop(1,'#1a0f08');ctx.fillStyle=g;ctx.fillRect(-20,-20,W+40,H+40);
+    for(let i=0;i<9;i++){ctx.fillStyle=`rgba(255,255,240,${.08+.05*Math.sin(t+i)})`;ctx.beginPath();ctx.moveTo(W/2,-20);ctx.lineTo(W/2-500+i*125,H+20);ctx.lineTo(W/2-440+i*125,H+20);ctx.fill();}}
+};
+
+/* ============ Input, HUD, loop ============ */
+const P={x:120,y:110};
+function pt(e){const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H};}
+cv.addEventListener('pointerdown',e=>{if(modalOpen()||fade.dir)return;const p=pt(e);P.x=p.x;P.y=p.y;try{cv.setPointerCapture(e.pointerId)}catch(_){}SC[cur].down&&SC[cur].down(p);});
+cv.addEventListener('pointermove',e=>{const p=pt(e);P.x=p.x;P.y=p.y;cv.style.cursor=(cur==='ch1'&&C1.objs.some(o=>!o.done&&Math.hypot(p.x-o.x,p.y-o.y)<o.r))||(cur==='ch1'&&Math.abs(p.x-GRATE.x)<34&&Math.abs(p.y-GRATE.y)<50)?'pointer':'crosshair';if(!modalOpen()&&SC[cur].move)SC[cur].move(p);});
+cv.addEventListener('pointerup',e=>{const p=pt(e);if(!modalOpen()&&SC[cur].up)SC[cur].up(p);});
+$('#hintBtn').onclick=()=>{const s=SC[cur];if(!s.hints){say('No hints here — just keep going.');return;}const i=G.hintIx[cur]||0;say('<b>Hint:</b> '+s.hints[Math.min(i,s.hints.length-1)]);if(i<s.hints.length){G.hints++;G.hintIx[cur]=i+1;}};
+$('#muteBtn').onclick=()=>{A.muted=!A.muted;$('#muteBtn').textContent='Sound: '+(A.muted?'Off':'On');if(A.master)A.master.gain.setTargetAtTime(A.muted?0:1,A.c.currentTime,.05);if(!A.muted&&!A.amb&&A.c){const n=A.ambName;A.ambName='';setAmb(n);}};
+$('#restartBtn').onclick=()=>{if(confirm('Restart the escape room from the beginning?'))location.reload();};
+function updateClock(){if(!G.start)return;const s=Math.floor(((G.end||Date.now())-G.start)/1000);$('#clock').textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;}
+let last=performance.now();
+function loop(now){
+  const dt=Math.min(.05,(now-last)/1000);last=now;const s=SC[cur],t=now/1000;
+  if(!modalOpen()&&!fade.dir&&s.update)s.update(dt,t);
+  ctx.save();if(G.shake>0){G.shake-=dt;ctx.translate((Math.random()-.5)*12,(Math.random()-.5)*12);}
+  s.draw(t);ctx.restore();
+  if(fade.dir){fade.a+=fade.dir*dt*1.3;if(fade.a>=1&&fade.cb){fade.a=1;const cb=fade.cb;fade.cb=null;cb();}if(fade.a<=0){fade.a=0;fade.dir=0;}}
+  if(fade.a>0){ctx.fillStyle=`rgba(0,0,0,${fade.a})`;ctx.fillRect(-20,-20,W+40,H+40);}
+  audioTick(dt);updateClock();requestAnimationFrame(loop);
+}
+SC.title.enter();requestAnimationFrame(loop);
+</script>
+</body>
+</html>
