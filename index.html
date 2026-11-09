@@ -101,19 +101,20 @@ function say(t){NARR.innerHTML=t;}
 const modalOpen=()=>M.classList.contains('show');
 function showModal(html){M.innerHTML='<div class="card">'+html+'</div>';M.classList.add('show');M.scrollTop=0;}
 function hideModal(){M.classList.remove('show');}
-const G={team:'',start:0,end:0,mistakes:0,hints:0,shake:0,hintIx:{},lvl:0,lm:[0,0,0,0,0,0,0],resumed:0};
+const G={team:'',start:0,end:0,mistakes:0,hints:0,shake:0,hintIx:{},lvl:0,lm:[0,0,0,0,0,0,0,0,0],resumed:0};
 function miss(n=1){G.mistakes+=n;G.lm[G.lvl]=(G.lm[G.lvl]||0)+n;$('#mist').textContent=G.mistakes;}
 const LV=[null,
   {s:'ch0',name:'The Tribunal',code:''},
   {s:'ch1',name:'Darkness & the Pit',code:'SERGE'},
+  {s:'drug',name:'The Drugged Water',code:'PITCHER'},
   {s:'paint',name:'The Painted Walls',code:'LOZENGE'},
   {s:'ch2',name:'The Pendulum',code:'SCYTHE'},
   {s:'ch3',name:'The Burning Walls',code:'SURCINGLE'},
   {s:'testi',name:'Testimony to Lasalle',code:'TALON'}];
 function NM(){return (G.team||'Prisoner').replace(/[<>&"]/g,'');}
 function lvlDots(n){return '<div class="lvls">'+LV.slice(1).map((l,i)=>`<span class="${i+1<n?'done':i+1===n?'on':''}">${i+1}. ${l.name}</span>`).join('')+'</div>';}
-function levelCard(n,goal,cb){G.lvl=n;$('#lvl').textContent=n+' / 6';
-  showModal(`<div class="kicker">Level ${n} of 6</div><h2>${LV[n].name}</h2>${lvlDots(n)}<p>${goal}</p>${LV[n].code?`<p class="why">Resume code for this level: <b style="color:var(--ember);font-weight:normal;letter-spacing:2px">${LV[n].code}</b> — write it down in case you have to stop.</p>`:''}<button class="btn" id="lvGo">Begin Level ${n}</button>`);
+function levelCard(n,goal,cb){G.lvl=n;$('#lvl').textContent=n+' / '+(LV.length-1);
+  showModal(`<div class="kicker">Level ${n} of ${LV.length-1}</div><h2>${LV[n].name}</h2>${lvlDots(n)}<p>${goal}</p>${LV[n].code?`<p class="why">Resume code for this level: <b style="color:var(--ember);font-weight:normal;letter-spacing:2px">${LV[n].code}</b> — write it down in case you have to stop.</p>`:''}<button class="btn" id="lvGo">Begin Level ${n}</button>`);
   $('#lvGo').onclick=()=>{hideModal();cb&&cb();};}
 
 /* ============ Audio (Web Audio, no files) ============ */
@@ -230,7 +231,7 @@ SC.title={
   enter(){
     say('An escape room based on Edgar Allan Poe’s “The Pit and the Pendulum.” Turn your sound on.');
     showModal(`<div class="kicker">An Escape Room · After Edgar Allan Poe</div><h2>Escape the Pit</h2>
-      <p>Toledo, Spain. Poe never gave his narrator a name — so tonight, <b>the prisoner is you</b>. Everything that happened to him is about to happen to you. You must survive <b>six levels</b> — the tribunal, the darkness and the pit, the painted walls, the pendulum, the burning walls, and your testimony — and the only way out is to <b>answer the questions</b>.</p>
+      <p>Toledo, Spain. Poe never gave his narrator a name — so tonight, <b>the prisoner is you</b>. Everything that happened to him is about to happen to you. You must survive <b>seven levels</b> — the tribunal, the darkness and the pit, the drugged water, the painted walls, the pendulum, the burning walls, and your testimony — and the only way out is to <b>answer the questions</b>.</p>
       ${lvlDots(0)}
       <p class="why">Wrong answers cost you: candles flare, the blade drops faster, and the walls close sooner. Every mistake is counted.</p>
       <p><input class="txt" id="team" maxlength="40" placeholder="Your name — you are the prisoner"></p>
@@ -337,12 +338,68 @@ SC.ch1={
 function openGrate(){
   showModal(`<div class="kicker">Chamber I · The Iron Grate</div><p class="pre">Your hands find an iron grate in the wall. Its lock has four letter-shaped holes carved into it.</p><h3>Enter the four-letter word:</h3><p><input class="txt" id="word" maxlength="8" autocomplete="off"></p><div id="fb"></div><button class="btn" id="tryW">Turn the lock</button> <button class="btn" id="cancelW" style="border-color:#4a3528;background:none">Step back</button>`);
   const inp=$('#word');inp.focus();
-  const tryIt=()=>{if(inp.value.trim().toUpperCase()==='RATS'){SFX.grate();showModal(`<div class="kicker">Level 2 · Complete</div><h2>RATS</h2><p>The grate grinds open — onto nothing but another stone wall. A cruel trick… or a warning? Something small and warm scurries across your feet in the dark. You shudder.</p><p class="why">Remember this word. In Poe’s story, help comes from the last place anyone would expect.</p><p>Exhausted, you drink from the pitcher, but the water was <b>drugged</b>.</p><p>When you wake, a strange, sulphurous glow is seeping from the walls…</p><button class="btn" id="next">Open your eyes</button>`);$('#next').onclick=()=>{hideModal();go('paint');};}
+  const tryIt=()=>{if(inp.value.trim().toUpperCase()==='RATS'){SFX.grate();showModal(`<div class="kicker">Level 2 · Complete</div><h2>RATS</h2><p>The grate grinds open — onto nothing but another stone wall. A cruel trick… or a warning? Something small and warm scurries across your feet in the dark. You shudder.</p><p class="why">Remember this word. In Poe’s story, help comes from the last place anyone would expect.</p><p>Exhausted and burning with thirst, you crawl back to where the bread and water were left for you…</p><button class="btn" id="next">Find the water</button>`);$('#next').onclick=()=>{hideModal();go('drug');};}
     else{SFX.bad();miss();$('#fb').innerHTML='<p class="badt">The lock will not turn. (Mistake +1)</p>';inp.select();}};
   $('#tryW').onclick=tryIt;inp.onkeydown=e=>{if(e.key==='Enter')tryIt();};$('#cancelW').onclick=hideModal;
 }
 
-/* ---- Level 3: The Painted Walls ---- */
+/* ---- Level 3: The Drugged Water ---- */
+const Q4=[
+  {q:'You drink the water and almost at once a heavy, unnatural sleep pulls at you. What can you infer about the water?',o:['It was drugged by your captors','It was poisoned to kill you right away','It was salt water from the sea','It was perfectly ordinary water'],why:'An inference uses clues plus what you know. A sudden, unnatural sleep right after drinking is a big clue.'},
+  {q:'Why would the Inquisition want their prisoner asleep?',o:['So they can move him and prepare the next torture without a fight','So he will forget why he was arrested','So he can rest before being set free','So the guards can rest too'],why:'When the narrator wakes, he is strapped to a wooden frame. They set the next trap while he slept.'},
+  {q:'Poe writes that “a deep sleep fell upon me — a sleep like that of death.” What kind of figurative language is this?',o:['A simile — it compares two things using “like”','A metaphor — it says sleep IS death','Personification — it gives sleep human feelings','Onomatopoeia — it imitates a sound'],why:'Comparing sleep to death also foreshadows how close the narrator is to dying.'},
+  {q:'What does it mean to make an inference while reading?',o:['Use clues from the text plus what you already know to figure out something not stated directly','Copy a sentence from the story word for word','Skip ahead to read the ending','Guess with no evidence at all'],why:'Poe never says “the water was drugged” right away. Readers infer it.'},
+  {q:'Food, water, and later light are all “gifts” from the captors. Why are these mercies frightening?',o:['Each one only keeps him alive for the next, worse torture','They are signs he will soon be released','They prove the guards feel sorry for him','They mean the Inquisition has forgotten him'],why:'In this story, every kindness is part of the cruelty.'},
+  {q:'Each time the narrator survives one danger, what happens next?',o:['A new and even worse danger is waiting','He is immediately rescued','He gives up hope completely','He fights his way out of the prison'],why:'This repeating pattern keeps building suspense all the way to the end.'},
+  {q:'Losing control of his own body — even his sleep — shows which theme most clearly?',o:['Helplessness and psychological terror','Love conquers all','Greed leads to ruin','Nature is peaceful'],why:'The Inquisition controls everything, even when he sleeps. That helplessness is part of the terror.'}];
+const D4={phase:'drink',drowse:0,orbs:[],right:0,need:5,pool:[],spawn:0};
+function d4Ctrl(){CTRL.innerHTML=`<div class="slot ${D4.right?'got':''}"><span>${D4.right} / ${D4.need}</span>Clues</div><div style="flex:1;max-width:260px;margin-left:12px"><div style="font-size:13px;color:var(--dim);margin-bottom:3px">Drowsiness</div><div style="height:12px;border:1px solid var(--line);border-radius:6px;overflow:hidden"><i id="drowBar" style="display:block;height:100%;width:${Math.round(D4.drowse*100)}%;background:linear-gradient(90deg,#6a5a8a,#b0405a)"></i></div></div>`;}
+function d4Spawn(){const left=Math.random()<.5;D4.orbs.push({x:left?-30:W+30,y:120+Math.random()*(H-260),vx:(left?1:-1)*(38+Math.random()*30),ph:Math.random()*6});}
+SC.drug={
+  hints:['Click the cup to drink — you have no choice. Your body needs water.','Click the glowing clues that drift through your blurry vision before your eyes close.','Every right answer splashes your mind awake. Wrong answers make you sleepier.'],
+  enter(){
+    $('#where').textContent='The Drugged Water';setAmb('dungeon');
+    Object.assign(D4,{phase:'drink',drowse:0,orbs:[],right:0,pool:shuffle(Q4),spawn:0});
+    say('<b>The Drugged Water.</b> Click the cup to drink.');d4Ctrl();
+    levelCard(3,`<span class="quote" style="display:block;margin-bottom:10px">“A deep sleep fell upon me — a sleep like that of death.”</span>Your throat burns with thirst, ${NM()}. Beside the bread sits a pitcher of water and a cup. You know you should not trust anything the Inquisition gives you… but you must drink. <b>Then fight the sleep: click the glowing clues drifting through your blurry vision and answer them before your eyes close.</b> Answer ${D4.need} to hold on long enough to learn the truth.`);
+  },
+  update(dt,t){
+    if(D4.phase!=='fight')return;
+    D4.drowse+=dt*.021;
+    D4.orbs.forEach(o=>{o.x+=o.vx*dt;o.y+=Math.sin(t*1.3+o.ph)*12*dt;});D4.orbs=D4.orbs.filter(o=>o.x>-60&&o.x<W+60);
+    D4.spawn-=dt;if(D4.orbs.length<3&&D4.spawn<=0){d4Spawn();D4.spawn=1.4;}
+    if(D4.drowse>=1){miss();G.shake=.4;SFX.thud();D4.drowse=.55;say('<b>Your eyes slam shut…</b> you jerk awake! Fight it! <i>(Mistake +1)</i>');}
+    const b=$('#drowBar');if(b)b.style.width=Math.round(Math.min(1,D4.drowse)*100)+'%';
+  },
+  draw(t){
+    const d=D4.phase==='drink'?0:Math.min(1,D4.drowse);
+    ctx.fillStyle='#0c0807';ctx.fillRect(-20,-20,W+40,H+40);drawFloor(10);
+    const scene=(ox,oy,a)=>{ctx.save();ctx.globalAlpha=a;ctx.translate(ox,oy);
+      ctx.fillStyle='#6b4a2a';ctx.beginPath();ctx.ellipse(400,400,46,24,-.2,0,Math.PI*2);ctx.fill();ctx.fillStyle='#8a6a48';ctx.beginPath();ctx.ellipse(396,393,30,12,-.2,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#5a5148';ctx.beginPath();ctx.moveTo(480,430);ctx.lineTo(540,430);ctx.lineTo(532,330);ctx.lineTo(490,330);ctx.closePath();ctx.fill();ctx.strokeStyle='#5a5148';ctx.lineWidth=7;ctx.beginPath();ctx.arc(546,375,20,-1.4,1.4);ctx.stroke();
+      ctx.fillStyle='#4a423a';ctx.fillRect(578,388,34,42);ctx.fillStyle='#2a3a4a';ctx.fillRect(582,392,26,8);ctx.restore();};
+    const wob=d*16;scene(0,0,1);if(d>.05)scene(Math.sin(t*1.7)*wob,Math.cos(t*1.3)*wob*.5,.35*d+.1);
+    if(D4.phase==='drink'){const a=.5+.4*Math.sin(t*4);ctx.strokeStyle=`rgba(233,198,106,${a})`;ctx.lineWidth=3;ctx.strokeRect(570,380,50,58);ctx.fillStyle=`rgba(233,198,106,${a})`;ctx.font='16px Georgia';ctx.textAlign='center';ctx.fillText('click the cup to drink',595,460);}
+    D4.orbs.forEach(o=>{const r=24+3*Math.sin(t*4+o.ph);const g=ctx.createRadialGradient(o.x,o.y,2,o.x,o.y,r*1.8);g.addColorStop(0,'rgba(255,230,160,.95)');g.addColorStop(.4,'rgba(233,198,106,.55)');g.addColorStop(1,'rgba(233,198,106,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(o.x,o.y,r*1.8,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#2a1a10';ctx.font='bold 22px Georgia';ctx.textAlign='center';ctx.fillText('?',o.x,o.y+8);});
+    vignette(.7+d*.25);
+    if(d>0){const h=d*H*.5;const gt=ctx.createLinearGradient(0,h-40,0,h);gt.addColorStop(0,'#000');gt.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle='#000';ctx.fillRect(-20,-20,W+40,h-40+20);ctx.fillStyle=gt;ctx.fillRect(-20,h-40,W+40,40);
+      const gb=ctx.createLinearGradient(0,H-h,0,H-h+40);gb.addColorStop(0,'rgba(0,0,0,0)');gb.addColorStop(1,'#000');ctx.fillStyle=gb;ctx.fillRect(-20,H-h,W+40,40);ctx.fillStyle='#000';ctx.fillRect(-20,H-h+40,W+40,h);}
+  },
+  down(p){
+    if(D4.phase==='drink'){if(p.x>560&&p.x<630&&p.y>370&&p.y<450){D4.phase='fight';D4.drowse=.12;SFX.drip();setTimeout(()=>SFX.drip(),180);setTimeout(()=>SFX.drip(),360);say('You drink deeply. Within moments your head swims… <b>Click the glowing clues before your eyes close!</b>');d4Spawn();}return;}
+    if(D4.phase!=='fight')return;
+    for(const o of D4.orbs){if(Math.hypot(p.x-o.x,p.y-o.y)<36){D4.orbs=D4.orbs.filter(x=>x!==o);
+      const q=Object.assign({k:`Level 3 · Clue ${D4.right+1} of ${D4.need}`},D4.pool.shift());
+      ask(q,ok=>{if(ok){D4.right++;D4.drowse=Math.max(0,D4.drowse-.3);say(`Your mind clears for a moment. (${D4.right} of ${D4.need} clues)`);
+          if(D4.right>=D4.need){D4.phase='done';D4.orbs=[];d4Ctrl();setTimeout(()=>{showModal(`<div class="kicker">Level 3 · Complete</div><h2>A Sleep Like Death</h2><p>You held on long enough to understand: the water was drugged, and the Inquisition is not finished with you. Then the drug wins. Your eyes close.</p><p class="why">Poe never tells us directly what the captors are doing while the narrator sleeps — we infer it from what he finds when he wakes.</p><p>When you wake, a strange, sulphurous glow is seeping from the walls…</p><button class="btn" id="next">Open your eyes</button>`);$('#next').onclick=()=>{hideModal();go('paint');};},500);}
+          else d4Ctrl();}
+        else{D4.pool.push(q);D4.drowse=Math.min(.98,D4.drowse+.12);d4Ctrl();say('Your thoughts blur… <i>(the drug pulls harder)</i>');}});
+      return;}}
+  }
+};
+
+/* ---- Level 4: The Painted Walls ---- */
 const PAINT=[
   {k:'pit',label:'The Pit',m:'The unknown, death, and fear of what cannot be seen'},
   {k:'pend',label:'The Pendulum',m:'The passage of time and the inevitability of death'},
@@ -377,7 +434,7 @@ SC.paint={
     CP.tiles=shuffle(PAINT).map((p,i)=>{const hx=108+i*196;return {k:p.k,m:p.m,hx,hy:520,x:hx,y:520,placed:false};});
     CP.drag=null;CP.over=null;CP.finished=false;
     say('<b>The Painted Walls.</b> Drag each meaning onto the painting it matches.');
-    levelCard(3,'A faint, sulphurous light reveals walls covered in hideous paintings — the horrors the Inquisition has in store for you. <b>Drag each meaning card onto the painting it symbolizes.</b> Match all five to break fear’s hold on your mind.');
+    levelCard(4,'A faint, sulphurous light reveals walls covered in hideous paintings — the horrors the Inquisition has in store for you. <b>Drag each meaning card onto the painting it symbolizes.</b> Match all five to break fear’s hold on your mind.');
   },
   draw(t){
     const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#24220f');g.addColorStop(1,'#0d0b06');ctx.fillStyle=g;ctx.fillRect(-20,-20,W+40,H+40);
@@ -395,7 +452,7 @@ SC.paint={
     if(!pp){tl.x=tl.hx;tl.y=tl.hy;return;}
     if(pp.k===tl.k){pp.done=true;tl.placed=true;tl.x=pp.x;tl.y=PY+195;SFX.good();
       const n=CP.paint.filter(x=>x.done).length;say(`<b>${pp.label}</b> — ${tl.m.toLowerCase()}. The painting’s eyes go dim. (${n} of 5)`);
-      if(n===5){CP.finished=true;setTimeout(()=>{showModal(`<div class="kicker">Level 3 · Complete</div><h2>The Spell Is Broken</h2><p>In the light you see the truth: the cell is far smaller than it seemed in the dark. Fear had made it feel endless.</p><p class="why">Poe’s symbols turn the narrator’s fears into things he can see.</p><p>But the drug still clouds your mind. You sink into sleep once more — and wake unable to move…</p><button class="btn" id="next">Wake up</button>`);$('#next').onclick=()=>{hideModal();go('ch2');};},800);}}
+      if(n===5){CP.finished=true;setTimeout(()=>{showModal(`<div class="kicker">Level 4 · Complete</div><h2>The Spell Is Broken</h2><p>In the light you see the truth: the cell is far smaller than it seemed in the dark. Fear had made it feel endless.</p><p class="why">Poe’s symbols turn the narrator’s fears into things he can see.</p><p>But the drug still clouds your mind. You sink into sleep once more — and wake unable to move…</p><button class="btn" id="next">Wake up</button>`);$('#next').onclick=()=>{hideModal();go('ch2');};},800);}}
     else{SFX.bad();miss();G.shake=.3;tl.x=tl.hx;tl.y=tl.hy;say(`The painted fiends sneer. That meaning doesn’t fit <b>${pp.label}</b>. <i>(Mistake +1)</i>`);}
   }
 };
@@ -421,7 +478,7 @@ SC.ch2={
     Object.assign(C2,{L:120,t:0,prevA:0,ang:0,straps:[360,450,540,630].map(x=>({x,greased:false,cut:false,rat:null})),rats:[],drag:null,pool:shuffle(Q2),qi:0,done:false,shown:false});
     say('<b>The Pendulum.</b> Drag the greasy meat onto the straps, then click the rats that come.');
     c2Ctrl();
-    levelCard(4,'You wake flat on your back, strapped to a wooden frame. You can only look <i>up</i> — and far above you, a razor-sharp crescent swings across your body… sinking lower with every pass. <b>Smear greasy meat on the straps to lure the rats, then answer each rat’s question</b> so it chews through. Free all four straps before the blade reaches you.');
+    levelCard(5,'You wake flat on your back, strapped to a wooden frame. You can only look <i>up</i> — and far above you, a razor-sharp crescent swings across your body… sinking lower with every pass. <b>Smear greasy meat on the straps to lure the rats, then answer each rat’s question</b> so it chews through. Free all four straps before the blade reaches you.');
   },
   update(dt){
     C2.t+=dt;C2.ang=.8*Math.sin(C2.t*Math.PI*2/2.4);
@@ -541,7 +598,7 @@ SC.ch3={
     Object.assign(C3,{p:0,lit:0,phase:'themes',seq:[],input:[],pool:shuffle(SCEN),qi:0,embers:[],rt:4,rescue:false,rp:0,playing:false,plaques:[0,1,2,3].map(i=>({i,done:false})),ended:false});
     say('<b>The Burning Walls.</b> Click the scorched plaques on the walls.');
     c3Ctrl();
-    levelCard(5,'The iron walls glow red-hot and grind inward, pushing you toward the pit. <b>Click the scorched plaques and name the theme each one shows</b> to light four trumpets. Then answer the trumpets’ call so the approaching army can find you.',()=>SFX.rumble());
+    levelCard(6,'The iron walls glow red-hot and grind inward, pushing you toward the pit. <b>Click the scorched plaques and name the theme each one shows</b> to light four trumpets. Then answer the trumpets’ call so the approaching army can find you.',()=>SFX.rumble());
   },
   update(dt){
     if(C3.rescue){C3.p=Math.max(0,C3.p-dt*.7);C3.rp=Math.min(1,C3.rp+dt*.5);}
@@ -598,12 +655,12 @@ function c3Rescue(){
 
 /* ---- Level 6: Testimony to Lasalle ---- */
 const EVENTS=['The judges of the Inquisition sentence the narrator to death.','He faints and wakes in a completely dark dungeon.','He tears a strip from his robe to measure the walls of his cell.','He trips and discovers a deep pit in the center of the floor.','He drinks drugged water and falls into a deep sleep.','He wakes strapped to a frame beneath a slowly descending pendulum.','He smears food on the straps, and the rats chew him free.','The red-hot walls close in, forcing him toward the pit.','General Lasalle catches his arm and rescues him.'];
-const FINALQ={k:'Level 6 · The Final Question',pre:'Lasalle nods slowly. “One last question, and you are free.”',q:'What is Poe’s biggest point in “The Pit and the Pendulum”?',o:['The anticipation of death can be just as terrifying as death itself','Crime never pays','Animals are smarter than people','Prisons should be more comfortable'],why:'Most of the horror came from what the narrator knew was coming — but not when.'};
+const FINALQ={k:'Level 7 · The Final Question',pre:'Lasalle nods slowly. “One last question, and you are free.”',q:'What is Poe’s biggest point in “The Pit and the Pendulum”?',o:['The anticipation of death can be just as terrifying as death itself','Crime never pays','Animals are smarter than people','Prisons should be more comfortable'],why:'Most of the horror came from what the narrator knew was coming — but not when.'};
 const CT={order:[],marks:null};
 function showTesti(msg){
   const sc=M.scrollTop;
   const lis=CT.order.map((e,pos)=>`<li class="${CT.marks&&CT.marks[pos]?'ok':''}"><span class="n">${pos+1}.</span><span class="t">${EVENTS[e]}</span><button data-u="${pos}" ${pos===0?'disabled':''} aria-label="Move up">▲</button><button data-d="${pos}" ${pos===CT.order.length-1?'disabled':''} aria-label="Move down">▼</button></li>`).join('');
-  showModal(`<div class="kicker">Level 6 · Your Testimony</div><h3>“${NM()}, tell me everything, from the beginning,” says General Lasalle.</h3><p class="why">Use ▲ and ▼ to put the events in the order they happened.</p><ol class="tl">${lis}</ol><div id="fb">${msg||''}</div><button class="btn" id="sub">Give testimony</button>`);
+  showModal(`<div class="kicker">Level 7 · Your Testimony</div><h3>“${NM()}, tell me everything, from the beginning,” says General Lasalle.</h3><p class="why">Use ▲ and ▼ to put the events in the order they happened.</p><ol class="tl">${lis}</ol><div id="fb">${msg||''}</div><button class="btn" id="sub">Give testimony</button>`);
   M.scrollTop=sc;
   const swap=(i,j)=>{[CT.order[i],CT.order[j]]=[CT.order[j],CT.order[i]];CT.marks=null;SFX.crackle(.08);showTesti();};
   M.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>{const i=+b.dataset.u;swap(i,i-1);});
@@ -618,8 +675,8 @@ SC.testi={
   enter(){
     $('#where').textContent='Lasalle’s Camp';setAmb('camp');
     do{CT.order=shuffle(EVENTS.map((_,i)=>i));}while(CT.order.every((e,i)=>e===i));CT.marks=null;
-    say('<b>Level 6.</b> Put the events of your imprisonment in order.');
-    levelCard(6,'You are free — but General Lasalle must hear exactly what the Inquisition did to you. <b>Put the events of your imprisonment in the correct order</b>, then answer one final question to earn your freedom.',()=>showTesti());
+    say('<b>Level 7.</b> Put the events of your imprisonment in order.');
+    levelCard(7,'You are free — but General Lasalle must hear exactly what the Inquisition did to you. <b>Put the events of your imprisonment in the correct order</b>, then answer one final question to earn your freedom.',()=>showTesti());
   },
   draw(t){SC.end.draw(t);ctx.fillStyle='rgba(0,0,0,.4)';ctx.fillRect(-20,-20,W+40,H+40);}
 };
@@ -630,7 +687,7 @@ SC.end={
     G.end=Date.now();setAmb('camp');$('#where').textContent='Rescued';setTimeout(()=>{bell(523.3,.1);bell(659.3,.08,.2);bell(784,.08,.4);bell(1046.5,.07,.6);},400);
     const s=Math.round((G.end-G.start)/1000),tm=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
     say('<b>You escaped.</b>');
-    showModal(`<div class="cert"><div class="kicker">Certificate of Escape</div><div class="big">${G.team.replace(/</g,'&lt;')}</div><p>survived all six levels of the Inquisition’s dungeon in Toledo.</p>
+    showModal(`<div class="cert"><div class="kicker">Certificate of Escape</div><div class="big">${G.team.replace(/</g,'&lt;')}</div><p>survived all seven levels of the Inquisition’s dungeon in Toledo.</p>
       <div class="stats"><div><small>Time</small><b>${tm}</b></div><div><small>Mistakes</small><b>${G.mistakes}</b></div><div><small>Hints</small><b>${G.hints}</b></div></div>
       <table class="mini">${LV.slice(1).map((l,i)=>`<tr><td>Level ${i+1} · ${l.name}</td><td>${i+1<(G.resumed||1)?'skipped':(G.lm[i+1]||0)+' mistake'+((G.lm[i+1]||0)===1?'':'s')}</td></tr>`).join('')}</table>
       ${G.resumed?`<p class="why">Resumed at Level ${G.resumed} with a code — time shown is for this session only.</p>`:''}
